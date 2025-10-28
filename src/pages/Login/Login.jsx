@@ -1,0 +1,320 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Container,
+  Alert,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import { mockUser, mockSuperAdmin } from "../../utils/mockData";
+import backgroundImage from "../../assets/images/LoginFondo.png";
+
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("admin");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    const selectedUser = userType === "superadmin" ? mockSuperAdmin : mockUser;
+
+    if (email && password) {
+      localStorage.setItem("user", JSON.stringify(selectedUser));
+      login(email, password);
+      navigate("/");
+    } else {
+      setError("Por favor ingresa email y contraseña");
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        bgcolor: "#0a0a0a",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: "rgba(10, 10, 20, 0.2)",
+        },
+      }}
+    >
+      <Container maxWidth="xs" sx={{ position: "relative", zIndex: 1 }}>
+        <Card
+          elevation={24}
+          sx={{
+            borderRadius: 3,
+            overflow: "hidden",
+            bgcolor: "rgba(255, 255, 255, 0.40)",
+            backdropFilter: "blur(15px)",
+            boxShadow: "0 8px 40px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          {/* Header refinado */}
+          <Box
+            sx={{
+              bgcolor: "#1E2C56",
+              py: 2.5,
+              px: 3,
+              textAlign: "center",
+              color: "#fff",
+            }}
+          >
+            <Box
+              sx={{
+                width: 50,
+                height: 50,
+                margin: "0 auto 10px",
+                borderRadius: "50%",
+                bgcolor: "#4A90E2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.3)",
+              }}
+            >
+              <LocalGasStationIcon sx={{ fontSize: 28, color: "#fff" }} />
+            </Box>
+            <Typography variant="h5" fontWeight="700" sx={{ mb: 0.5, letterSpacing: 0.3 }}>
+              Fuel Manager
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.8, fontSize: "0.75rem" }}>
+              Sistema de Gestión de Combustible
+            </Typography>
+          </Box>
+
+          <CardContent sx={{ p: 3 }}>
+            {/* Toggle buttons más elegantes */}
+            <ToggleButtonGroup
+              value={userType}
+              exclusive
+              onChange={(e, value) => value && setUserType(value)}
+              fullWidth
+              sx={{
+                mb: 2,
+                "& .MuiToggleButton-root": {
+                  py: 1,
+                  px: 2,
+                  textTransform: "none",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  border: "none",
+                  borderRadius: "6px !important",
+                  color: "#555",
+                  bgcolor: "rgba(255, 255, 255, 0.6)",
+                  transition: "all 0.3s ease",
+                  "&:first-of-type": {
+                    borderTopRightRadius: "0 !important",
+                    borderBottomRightRadius: "0 !important",
+                  },
+                  "&:last-of-type": {
+                    borderTopLeftRadius: "0 !important",
+                    borderBottomLeftRadius: "0 !important",
+                  },
+                  "&.Mui-selected": {
+                    bgcolor: "#1E2C56",
+                    color: "#fff",
+                    boxShadow: "0 2px 8px rgba(30, 44, 86, 0.3)",
+                    "&:hover": {
+                      bgcolor: "#253661",
+                    },
+                  },
+                  "&:hover": {
+                    bgcolor: "rgba(255, 255, 255, 0.8)",
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="admin">Admin</ToggleButton>
+              <ToggleButton value="superadmin">SuperAdmin</ToggleButton>
+            </ToggleButtonGroup>
+
+            <form onSubmit={handleSubmit}>
+              {/* Email con label fuera */}
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  mb: 0.5,
+                  fontWeight: 600,
+                  color: "#333",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Email *
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="correo@ejemplo.com"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                size="small"
+                required
+                autoFocus
+                InputProps={{
+                  startAdornment: (
+                    <EmailOutlinedIcon
+                      sx={{ mr: 1, color: "#4A90E2", fontSize: 20 }}
+                    />
+                  ),
+                }}
+                sx={{
+                  mb: 2,
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(255, 255, 255, 0.9)",
+                    borderRadius: 1.5,
+                    "& input": {
+                      py: 1.3,
+                      fontSize: "0.9rem",
+                    },
+                    "& fieldset": {
+                      borderColor: "rgba(0, 0, 0, 0.1)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#1E2C56",
+                      borderWidth: 2,
+                    },
+                  },
+                }}
+              />
+
+              {/* Contraseña con label fuera */}
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  mb: 0.5,
+                  fontWeight: 600,
+                  color: "#333",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Contraseña *
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="••••••••"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                size="small"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <LockOutlinedIcon
+                      sx={{ mr: 1, color: "#4A90E2", fontSize: 20 }}
+                    />
+                  ),
+                }}
+                sx={{
+                  mb: 2,
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(255, 255, 255, 0.9)",
+                    borderRadius: 1.5,
+                    "& input": {
+                      py: 1.3,
+                      fontSize: "0.9rem",
+                    },
+                    "& fieldset": {
+                      borderColor: "rgba(0, 0, 0, 0.1)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#1E2C56",
+                      borderWidth: 2,
+                    },
+                  },
+                }}
+              />
+
+              {error && (
+                <Alert
+                  severity="error"
+                  sx={{
+                    mb: 2,
+                    py: 0.5,
+                    fontSize: "0.8rem",
+                    borderRadius: 1.5,
+                  }}
+                >
+                  {error}
+                </Alert>
+              )}
+
+              {/* Botón más elegante */}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  py: 1.4,
+                  bgcolor: "#1E2C56",
+                  fontWeight: "600",
+                  textTransform: "none",
+                  fontSize: "1rem",
+                  borderRadius: 1.5,
+                  boxShadow: "0 4px 12px rgba(30, 44, 86, 0.3)",
+                  "&:hover": {
+                    bgcolor: "#253661",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 20px rgba(30, 44, 86, 0.4)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Iniciar Sesión
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            textAlign: "center",
+            mt: 2,
+            fontSize: "0.75rem",
+            color: "rgba(255,255,255,0.9)",
+            textShadow: "0 2px 4px rgba(0,0,0,0.6)",
+          }}
+        >
+          © 2025 Fuel Manager
+        </Typography>
+      </Container>
+    </Box>
+  );
+}
