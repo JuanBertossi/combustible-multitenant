@@ -25,7 +25,6 @@ export default function Configuracion() {
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
-    // Aquí iría la lógica para guardar en la API
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
