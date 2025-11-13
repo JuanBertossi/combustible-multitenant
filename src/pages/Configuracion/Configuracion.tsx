@@ -8,6 +8,9 @@ import {
   Grid,
   Divider,
   Alert,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import { useAuth } from "../../hooks/useAuth";
@@ -22,6 +25,10 @@ export default function Configuracion() {
     whatsappBusiness: string;
     precioLitro: string;
     umbralAlerta: string;
+    // --- NUEVOS CAMPOS ---
+    evidenciaFotoOdometro: boolean;
+    evidenciaFotoSurtidor: boolean;
+    evidenciaUbicacion: boolean;
   }
 
   const [formData, setFormData] = useState<ConfigFormData>({
@@ -31,12 +38,23 @@ export default function Configuracion() {
     whatsappBusiness: "+54 351 7654321",
     precioLitro: "600",
     umbralAlerta: "80",
+    // --- NUEVOS CAMPOS ---
+    evidenciaFotoOdometro: true,
+    evidenciaFotoSurtidor: false,
+    evidenciaUbicacion: true,
   });
   const [saved, setSaved] = useState<boolean>(false);
 
   const handleSave = (): void => {
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.checked,
+    });
   };
 
   return (
@@ -57,8 +75,9 @@ export default function Configuracion() {
         </Alert>
       )}
 
-      <Paper elevation={2} sx={{ p: 4, borderRadius: 2 }}>
-        <Grid container spacing={3}>
+      <Paper elevation={0} sx={{ border: "1px solid #e0e0e0", p: 4, borderRadius: 2 }}>
+        <Grid container spacing={4}>
+          {/* --- SECCIÓN 1: INFORMACIÓN GENERAL --- */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -117,6 +136,7 @@ export default function Configuracion() {
             />
           </Grid>
 
+          {/* --- SECCIÓN 2: CONFIGURACIÓN DE COMBUSTIBLE --- */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
             <Typography
@@ -140,7 +160,7 @@ export default function Configuracion() {
               onChange={(e) =>
                 setFormData({ ...formData, precioLitro: e.target.value })
               }
-              helperText="Precio base del combustible"
+              helperText="Precio base del combustible (usado para reportes)"
             />
           </Grid>
 
@@ -154,10 +174,60 @@ export default function Configuracion() {
               onChange={(e) =>
                 setFormData({ ...formData, umbralAlerta: e.target.value })
               }
-              helperText="Porcentaje de capacidad para generar alerta"
+              helperText="Porcentaje de capacidad de tanque para generar alerta"
             />
           </Grid>
 
+          {/* --- SECCIÓN 3: EVIDENCIAS (NUEVA) --- */}
+          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
+          <Grid item xs={12}>
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ mt: 3 }}
+            >
+              Configuración de Evidencias (WhatsApp)
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+              Define qué evidencias serán obligatorias para el chofer al reportar una carga.
+            </Typography>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.evidenciaFotoOdometro}
+                    onChange={handleCheckboxChange}
+                    name="evidenciaFotoOdometro"
+                  />
+                }
+                label="Requerir Foto del Odómetro/Horímetro"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.evidenciaFotoSurtidor}
+                    onChange={handleCheckboxChange}
+                    name="evidenciaFotoSurtidor"
+                  />
+                }
+                label="Requerir Foto del Surtidor/Factura"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.evidenciaUbicacion}
+                    onChange={handleCheckboxChange}
+                    name="evidenciaUbicacion"
+                  />
+                }
+                label="Requerir Ubicación (GPS)"
+              />
+            </FormGroup>
+          </Grid>
+
+          {/* --- ACCIÓN DE GUARDAR --- */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
@@ -167,10 +237,9 @@ export default function Configuracion() {
                 startIcon={<SaveIcon />}
                 onClick={handleSave}
                 sx={{
-                  bgcolor: "#1a1a2e",
-                  fontWeight: "bold",
-                  px: 4,
-                  "&:hover": { bgcolor: "#252540" },
+                  bgcolor: "#1E2C56",
+                  fontWeight: 600,
+                  "&:hover": { bgcolor: "#16213E" },
                 }}
               >
                 Guardar Configuración

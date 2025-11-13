@@ -25,15 +25,14 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useAuth } from "../../hooks/useAuth";
 import * as XLSX from "xlsx";
-import type { Surtidor, FormErrors } from "../../types";
+// --- IMPORTACIONES CORREGIDAS ---
+import { mockSurtidores } from "../../utils/mockData";
+import type { SurtidorExtended, FormErrors } from "../../types";
+// --- FIN DE CORRECCIÓN ---
 
 const TIPOS_COMBUSTIBLE: string[] = ["Diésel", "Nafta", "GNC", "GLP"];
 
-interface SurtidorExtended extends Surtidor {
-  codigo?: string;
-  tipoCombustible?: string;
-  empresa?: string;
-}
+// (La interfaz SurtidorExtended se movió a types/index.ts)
 
 interface SurtidorFormData {
   codigo: string;
@@ -43,42 +42,11 @@ interface SurtidorFormData {
   activo: boolean;
 }
 
-// Mock data inicial
-const mockSurtidores: SurtidorExtended[] = [
-  {
-    id: 1,
-    codigo: "SUR-001",
-    nombre: "Surtidor Principal",
-    ubicacion: "Estación Central",
-    tipoCombustible: "Diésel",
-    empresaId: 1,
-    empresa: "AgroTransporte SA",
-    activo: true,
-  },
-  {
-    id: 2,
-    codigo: "SUR-002",
-    nombre: "Surtidor Campo Norte",
-    ubicacion: "Lote 45",
-    tipoCombustible: "Diésel",
-    empresaId: 1,
-    empresa: "AgroTransporte SA",
-    activo: true,
-  },
-  {
-    id: 3,
-    codigo: "SUR-003",
-    nombre: "Surtidor Nave 3",
-    ubicacion: "Planta Industrial",
-    tipoCombustible: "Nafta",
-    empresaId: 2,
-    empresa: "Transportes del Sur",
-    activo: false,
-  },
-];
+// (La constante mockSurtidores se movió a utils/mockData.ts)
 
 export default function Surtidores() {
   const { user } = useAuth();
+  // --- USA EL mockSurtidores IMPORTADO ---
   const [surtidores, setSurtidores] =
     useState<SurtidorExtended[]>(mockSurtidores);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -218,8 +186,9 @@ export default function Surtidores() {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
+       {/* ... (todo el JSX de Surtidores.tsx no cambia) ... */}
+       {/* Header */}
+       <Box sx={{ mb: 4 }}>
         <Box
           sx={{
             display: "flex",

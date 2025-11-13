@@ -12,6 +12,8 @@ import {
   Collapse,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
@@ -60,6 +62,12 @@ const menuStructure: MenuItem[] = [
         label: "Usuarios",
         icon: <PeopleIcon />,
         path: "/usuarios",
+        roles: ["SuperAdmin", "Admin"],
+      },
+      {
+        label: "Centros de Costo",
+        icon: <AccountTreeIcon />,
+        path: "/centros-costo",
         roles: ["SuperAdmin", "Admin"],
       },
     ],
@@ -114,6 +122,12 @@ const menuStructure: MenuItem[] = [
         roles: ["SuperAdmin", "Admin"],
       },
     ],
+  },
+  {
+    label: "Reportes",
+    icon: <AssessmentIcon />,
+    path: "/reportes",
+    roles: ["SuperAdmin", "Admin", "Supervisor"],
   },
   {
     label: "Configuración",

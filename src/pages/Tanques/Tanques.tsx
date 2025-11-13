@@ -48,7 +48,7 @@ interface TanqueFormData {
 }
 
 // Mock data
-const mockTanques: TanqueExtended[] = [
+export const mockTanques: TanqueExtended[] = [
   {
     id: 1,
     codigo: "TNQ-001",

@@ -137,6 +137,12 @@ export interface Surtidor {
   updatedAt?: string;
 }
 
+export interface SurtidorExtended extends Surtidor {
+  codigo?: string;
+  tipoCombustible?: string;
+  empresa?: string;
+}
+
 // ============================================
 // Tipos de Tanque
 // ============================================
@@ -155,9 +161,23 @@ export interface Tanque {
 }
 
 // ============================================
-// Tipos de Usuario del Sistema
+// Tipos de Centro de Costo
 // ============================================
 
+export type TipoCentroCosto = "Lote" | "Obra" | "Area" | "Proyecto" | "Otro";
+
+export interface CentroCosto {
+  id: number;
+  codigo: string;
+  nombre: string;
+  tipo: TipoCentroCosto;
+  activo: boolean;
+  empresaId: number;
+  empresaNombre?: string;
+}
+// ============================================
+// Tipos de Usuario del Sistema
+// ============================================
 export interface Usuario {
   id: number;
   nombre: string;

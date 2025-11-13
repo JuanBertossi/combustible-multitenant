@@ -19,6 +19,8 @@ const ValidacionEventos = lazy(
 const Configuracion = lazy(() => import("./pages/Configuracion/Configuracion"));
 const Surtidores = lazy(() => import("./pages/Surtidores/Surtidores"));
 const Tanques = lazy(() => import("./pages/Tanques/Tanques"));
+const CentrosCosto = lazy(() => import("./pages/CentroCosto/CentrosCosto"));
+const Reportes = lazy(() => import("./pages/reportes/Reportes"));
 
 /**
  * Componente de carga mientras se cargan las páginas lazy
@@ -116,6 +118,15 @@ function AppRoutes() {
             </Suspense>
           }
         />
+        {/* --- NUEVA RUTA --- */}
+        <Route
+          path="centros-costo"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CentrosCosto />
+            </Suspense>
+          }
+        />
 
         {/* Flota */}
         <Route
@@ -168,6 +179,17 @@ function AppRoutes() {
             </Suspense>
           }
         />
+
+        {/* --- NUEVA RUTA REPORTE --- */}
+        <Route
+          path="reportes"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Reportes />
+            </Suspense>
+          }
+        />
+
         {/* Configuración */}
         <Route
           path="configuracion"
