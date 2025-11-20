@@ -1,5 +1,5 @@
 // Datos hardcodeados para el MVP
-import type { CentroCosto, SurtidorExtended } from "../types";
+import type { Evento, CentroCosto, SurtidorExtended } from "../types";
 export const mockUser = {
   id: 1,
   nombre: "Juan",
@@ -42,7 +42,6 @@ export const mockSurtidores: SurtidorExtended[] = [
     activo: false,
   },
 ];
-
 
 // --- CORRIGE EL TIPO DE mockCentrosCosto ---
 export const mockCentrosCosto: CentroCosto[] = [
@@ -286,61 +285,210 @@ export const mockChoferes = [
   },
 ];
 
-export const mockEventos = [
+export const mockEventos: Evento[] = [
   {
     id: 1,
+    fecha: "2023-02-02T08:00:00Z", //
+    vehiculoId: 2, // Asignado desde mockVehiculos
+    vehiculoPatente: "PICK UP", //
+    choferId: 1, // Asignado desde mockChoferes
+    choferNombre: "Roberto Sánchez",
+    litros: 55, //
+    precio: 950.0,
+    total: 52250,
+    surtidorId: 1, // Asignado desde mockSurtidores
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "Carga inicial de planilla",
+    estado: "Validado",
     empresaId: 1,
-    empresa: "AgroTransporte SA",
-    fecha: "2025-10-28T08:30:00",
-    vehiculo: "ABC123 - Mercedes Benz Atego",
-    chofer: "Roberto Sánchez",
-    litros: 280,
-    costo: 168000,
-    kmInicial: 45230,
-    kmFinal: 45580,
-    estado: "Pendiente",
-    ruta: "Córdoba - Rosario",
+    empresaNombre: "AgroTransporte SA",
   },
   {
     id: 2,
+    fecha: "2023-02-03T09:30:00Z", //
+    vehiculoId: 2, // Asignado desde mockVehiculos (Tractor)
+    vehiculoPatente: "PAUNY NUEVO", //
+    choferId: 2, // Asignado desde mockChoferes
+    choferNombre: "Diego Fernández",
+    litros: 127, //
+    precio: 950.0,
+    total: 120650,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Pendiente", // Ideal para probar la pantalla de validación
     empresaId: 1,
-    empresa: "AgroTransporte SA",
-    fecha: "2025-10-27T15:45:00",
-    vehiculo: "DEF456 - John Deere 6110J",
-    chofer: "Diego Fernández",
-    litros: 180,
-    costo: 108000,
-    lote: "Lote 5B",
-    labor: "Siembra",
-    estado: "Validado",
+    empresaNombre: "AgroTransporte SA",
   },
   {
     id: 3,
-    empresaId: 2,
-    empresa: "Logística del Sur",
-    fecha: "2025-10-27T11:20:00",
-    vehiculo: "GHI789 - Scania R450",
-    chofer: "Luis Gómez",
-    litros: 350,
-    costo: 210000,
-    kmInicial: 89450,
-    kmFinal: 89920,
+    fecha: "2023-02-06T11:00:00Z", //
+    vehiculoId: 4, // Asignado desde mockVehiculos (Sembradora)
+    vehiculoPatente: "METALFOR", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 104, //
+    precio: 950.0,
+    total: 98800,
+    surtidorId: 2, // Asignado desde mockSurtidores
+    surtidorNombre: "Surtidor Campo Norte",
+    observaciones: "Carga en Lote 45",
     estado: "Validado",
-    ruta: "Buenos Aires - Mendoza",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
   },
   {
     id: 4,
+    fecha: "2023-02-08T15:00:00Z", //
+    vehiculoId: 1, // Asignado desde mockVehiculos (Camión)
+    vehiculoPatente: "AUTOELEVADOR FORTIA", //
+    choferId: 2,
+    choferNombre: "Diego Fernández",
+    litros: 50, //
+    precio: 950.0,
+    total: 47500,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Validado",
     empresaId: 1,
-    empresa: "AgroTransporte SA",
-    fecha: "2025-10-26T09:10:00",
-    vehiculo: "ABC123 - Mercedes Benz Atego",
-    chofer: "Roberto Sánchez",
-    litros: 290,
-    costo: 174000,
-    kmInicial: 44890,
-    kmFinal: 45230,
-    estado: "Rechazado",
-    ruta: "Rosario - Córdoba",
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 5,
+    fecha: "2023-02-09T08:15:00Z", //
+    vehiculoId: 4,
+    vehiculoPatente: "METALFOR", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 155, //
+    precio: 955.0, // Precio diferente
+    total: 148025,
+    surtidorId: 2,
+    surtidorNombre: "Surtidor Campo Norte",
+    observaciones: "",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 6,
+    fecha: "2023-02-13T10:00:00Z", //
+    vehiculoId: 2,
+    vehiculoPatente: "NEW HOLLAND", //
+    choferId: 2,
+    choferNombre: "Diego Fernández",
+    litros: 141, //
+    precio: 955.0,
+    total: 134655,
+    surtidorId: 2,
+    surtidorNombre: "Surtidor Campo Norte",
+    observaciones: "",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 7,
+    fecha: "2023-02-15T16:30:00Z", //
+    vehiculoId: 1,
+    vehiculoPatente: "FORTIA", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 47, //
+    precio: 955.0,
+    total: 44885,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Rechazado", // Para probar el filtro de rechazados
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 8,
+    fecha: "2023-02-17T09:00:00Z", //
+    vehiculoId: 2,
+    vehiculoPatente: "PAUNY NUEVO", //
+    choferId: 2,
+    choferNombre: "Diego Fernández",
+    litros: 150, //
+    precio: 955.0,
+    total: 143250,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Pendiente", // Otro pendiente
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 9,
+    fecha: "2023-02-23T14:00:00Z", //
+    vehiculoId: 2, // Asumimos PICK UP es vehiculoId 2
+    vehiculoPatente: "PICK UP", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 71, //
+    precio: 960.0,
+    total: 68160,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 10,
+    fecha: "2023-02-23T14:05:00Z", //
+    vehiculoId: 4,
+    vehiculoPatente: "METALFOR", //
+    choferId: 2,
+    choferNombre: "Diego Fernández",
+    litros: 133, //
+    precio: 960.0,
+    total: 127680,
+    surtidorId: 2,
+    surtidorNombre: "Surtidor Campo Norte",
+    observaciones: "Carga consecutiva",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 11,
+    fecha: "2023-02-24T18:00:00Z", //
+    vehiculoId: 1, // Asumimos GENERADOR es vehiculoId 1 (Camión?)
+    vehiculoPatente: "GENERADOR", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 111, //
+    precio: 960.0,
+    total: 106560,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "Generador planta",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
+  },
+  {
+    id: 12,
+    fecha: "2023-02-27T18:30:00Z", //
+    vehiculoId: 1,
+    vehiculoPatente: "GENERADOR", //
+    choferId: 1,
+    choferNombre: "Roberto Sánchez",
+    litros: 104, //
+    precio: 960.0,
+    total: 99840,
+    surtidorId: 1,
+    surtidorNombre: "Surtidor Principal",
+    observaciones: "",
+    estado: "Validado",
+    empresaId: 1,
+    empresaNombre: "AgroTransporte SA",
   },
 ];
 

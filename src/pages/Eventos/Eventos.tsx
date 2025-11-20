@@ -5,24 +5,23 @@ import {
   MenuItem,
   Typography,
   InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Grid,
   Card,
   CardContent,
   Chip,
   Button,
-  Divider,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import AddIcon from "@mui/icons-material/Add";
+import CargarEventoForm, { EventoFormData } from "../../components/eventos/CargarEventoForm";
+import EventoDetalle from "../../components/eventos/EventoDetalle";
 import { mockEventos } from "../../utils/mockData";
+import { getEvidenciasByEvento } from "../../utils/mockEvidencias";
 import { useAuth } from "../../hooks/useAuth";
-import { format } from "date-fns";
+import { format, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-fns";
 import { ESTADOS_EVENTO } from "../../utils/constants";
 import * as XLSX from "xlsx";
 import type { Evento } from "../../types";
@@ -32,6 +31,7 @@ const estadosEvento: string[] = [
   ESTADOS_EVENTO.PENDIENTE ?? "",
   ESTADOS_EVENTO.VALIDADO ?? "",
   ESTADOS_EVENTO.RECHAZADO ?? "",
+  ESTADOS_EVENTO.FINALIZADO ?? "",
 ];
 
 interface EventoExtended extends Evento {
@@ -50,12 +50,18 @@ interface EventoExtended extends Evento {
 export default function Eventos() {
   const { user } = useAuth();
   const [eventos] = useState<EventoExtended[]>(mockEventos as EventoExtended[]);
+  
+  // Filtros
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterEstado, setFilterEstado] = useState<string>("Todos");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
   const [selectedEvento, setSelectedEvento] = useState<EventoExtended | null>(
     null
   );
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
 
   const eventosPorEmpresa =
     user?.rol === "SuperAdmin"
@@ -66,8 +72,25 @@ export default function Eventos() {
     const matchSearch =
       (e.vehiculo || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (e.chofer || "").toLowerCase().includes(searchTerm.toLowerCase());
+    
     const matchEstado = filterEstado === "Todos" || e.estado === filterEstado;
-    return matchSearch && matchEstado;
+
+    let matchDate = true;
+    if (startDate && endDate) {
+      const eventDate = parseISO(e.fecha);
+      matchDate = isWithinInterval(eventDate, {
+        start: startOfDay(parseISO(startDate)),
+        end: endOfDay(parseISO(endDate)),
+      });
+    } else if (startDate) {
+      const eventDate = parseISO(e.fecha);
+      matchDate = eventDate >= startOfDay(parseISO(startDate));
+    } else if (endDate) {
+      const eventDate = parseISO(e.fecha);
+      matchDate = eventDate <= endOfDay(parseISO(endDate));
+    }
+
+    return matchSearch && matchEstado && matchDate;
   });
 
   const handleExport = (): void => {
@@ -108,18 +131,57 @@ export default function Eventos() {
     setOpenDialog(true);
   };
 
+  const handleSubmitEvento = async (data: EventoFormData): Promise<void> => {
+    // Simular creación de evento
+    const newId = Math.max(...eventos.map((e) => e.id)) + 1;
+    
+    const vehiculo = mockEventos.find(e => e.vehiculoId === data.vehiculoId)?.vehiculo || "Vehículo Desconocido";
+    const chofer = mockEventos.find(e => e.choferId === data.choferId)?.chofer || "Chofer Desconocido";
+    
+    const nuevoEvento: EventoExtended = {
+      id: newId,
+      empresaId: user?.empresaId || 1,
+      vehiculoId: data.vehiculoId!,
+      choferId: data.choferId!,
+      fecha: data.fecha,
+      litros: data.litros!,
+      estado: ESTADOS_EVENTO.PENDIENTE,
+      vehiculo: vehiculo,
+      chofer: chofer,
+      // Datos simulados o calculados
+      costo: (data.litros || 0) * 1050, // Precio mock
+      total: (data.litros || 0) * 1050,
+      kmInicial: data.odometro ? data.odometro - 100 : undefined, // Mock anterior
+      kmFinal: data.odometro || undefined,
+      latitud: data.latitud || undefined,
+      longitud: data.longitud || undefined,
+    };
+
+    // Actualizar estado local para reflejar el cambio en la UI
+    // @ts-expect-error - setEventos no está tipado explícitamente en el useState original pero React lo infiere
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setEventos((prev: any[]) => [nuevoEvento, ...prev]);
+    
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mostrar feedback (podría ser un Toast en el futuro)
+    console.log("Evento creado:", nuevoEvento);
+  };
+
   interface EstadoColors {
     bg: string;
     color: string;
   }
 
-  type EventoEstadoKey = "Validado" | "Pendiente" | "Rechazado";
+  type EventoEstadoKey = "Validado" | "Pendiente" | "Rechazado" | "Finalizado";
 
   const getEstadoColor = (estado: string): EstadoColors => {
     const colors: Record<EventoEstadoKey, EstadoColors> = {
       Validado: { bg: "#10b98115", color: "#10b981" },
       Pendiente: { bg: "#f59e0b15", color: "#f59e0b" },
       Rechazado: { bg: "#ef444415", color: "#ef4444" },
+      Finalizado: { bg: "#3b82f615", color: "#3b82f6" },
     };
     return (
       colors[estado as EventoEstadoKey] ?? { bg: "#99999915", color: "#999" }
@@ -147,6 +209,18 @@ export default function Eventos() {
               {filteredEventos.length === 1 ? "evento" : "eventos"}
             </Typography>
           </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenFormDialog(true)}
+            sx={{
+              bgcolor: "#10b981",
+              fontWeight: 600,
+              "&:hover": { bgcolor: "#059669" },
+            }}
+          >
+            Nuevo Evento
+          </Button>
         </Box>
 
         {/* Filtros */}
@@ -167,7 +241,7 @@ export default function Eventos() {
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ flexGrow: 1, minWidth: 250 }}
+            sx={{ flexGrow: 1, minWidth: 200 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -175,6 +249,26 @@ export default function Eventos() {
                 </InputAdornment>
               ),
             }}
+          />
+
+          <TextField
+            type="date"
+            size="small"
+            label="Desde"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: 150 }}
+          />
+
+          <TextField
+            type="date"
+            size="small"
+            label="Hasta"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: 150 }}
           />
 
           <TextField
@@ -381,224 +475,24 @@ export default function Eventos() {
         </Box>
       )}
 
-      {/* Dialog de detalle */}
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Detalle del Evento #{selectedEvento?.id}</DialogTitle>
-        <DialogContent>
-          {selectedEvento && (
-            <Grid container spacing={3} sx={{ pt: 2 }}>
-              {user?.rol === "SuperAdmin" && (
-                <>
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12}>
-                    <Typography variant="caption" color="text.secondary">
-                      Empresa
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {selectedEvento.empresa}
-                    </Typography>
-                  </Grid>
-                </>
-              )}
+      {/* Dialog de detalle usando el componente reutilizable */}
+      {selectedEvento && (
+        <EventoDetalle
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          evento={selectedEvento}
+          evidencias={getEvidenciasByEvento(selectedEvento.id)}
+          // No pasamos onValidate ni onReject para modo "solo lectura"
+          // o podemos pasarlos si queremos permitir validar desde aquí
+        />
+      )}
 
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">
-                  Fecha
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  {format(new Date(selectedEvento.fecha), "dd/MM/yyyy HH:mm")}
-                </Typography>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">
-                  Estado
-                </Typography>
-                <Box sx={{ mt: 0.5 }}>
-                  <Chip
-                    label={selectedEvento.estado}
-                    size="small"
-                    sx={{
-                      bgcolor: getEstadoColor(selectedEvento.estado).bg,
-                      color: getEstadoColor(selectedEvento.estado).color,
-                      fontWeight: 600,
-                    }}
-                  />
-                </Box>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">
-                  Vehículo
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  {selectedEvento.vehiculo}
-                </Typography>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">
-                  Chofer
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  {selectedEvento.chofer}
-                </Typography>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={4}>
-                <Typography variant="caption" color="text.secondary">
-                  Litros Cargados
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  {selectedEvento.litros} L
-                </Typography>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={4}>
-                <Typography variant="caption" color="text.secondary">
-                  Costo Total
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  $
-                  {(
-                    selectedEvento.costo ||
-                    selectedEvento.total ||
-                    0
-                  ).toLocaleString()}
-                </Typography>
-              </Grid>
-
-              {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={4}>
-                <Typography variant="caption" color="text.secondary">
-                  Precio por Litro
-                </Typography>
-                <Typography variant="body1" fontWeight="600">
-                  $
-                  {(
-                    (selectedEvento.costo || selectedEvento.total || 0) /
-                    selectedEvento.litros
-                  ).toFixed(2)}
-                </Typography>
-              </Grid>
-
-              {selectedEvento.kmInicial && (
-                <>
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12}>
-                    <Divider>
-                      <Typography variant="caption">
-                        Datos de Transporte
-                      </Typography>
-                    </Divider>
-                  </Grid>
-
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12} sm={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Km Inicial
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {selectedEvento.kmInicial} km
-                    </Typography>
-                  </Grid>
-
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12} sm={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Km Final
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {selectedEvento.kmFinal} km
-                    </Typography>
-                  </Grid>
-
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12} sm={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Recorrido
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {(selectedEvento.kmFinal ?? 0) -
-                        (selectedEvento.kmInicial ?? 0)}{" "}
-                      km
-                    </Typography>
-                  </Grid>
-
-                  {selectedEvento.ruta && (
-                    <>
-                      {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                      <Grid item xs={12}>
-                        <Typography variant="caption" color="text.secondary">
-                          Ruta
-                        </Typography>
-                        <Typography variant="body1" fontWeight="600">
-                          {selectedEvento.ruta}
-                        </Typography>
-                      </Grid>
-                    </>
-                  )}
-                </>
-              )}
-
-              {selectedEvento.lote && (
-                <>
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12}>
-                    <Divider>
-                      <Typography variant="caption">Datos Agrícolas</Typography>
-                    </Divider>
-                  </Grid>
-
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Lote
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {selectedEvento.lote}
-                    </Typography>
-                  </Grid>
-
-                  {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Labor
-                    </Typography>
-                    <Typography variant="body1" fontWeight="600">
-                      {selectedEvento.labor}
-                    </Typography>
-                  </Grid>
-                </>
-              )}
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cerrar</Button>
-        </DialogActions>
-      </Dialog>
+      {/* Formulario de Carga Manual */}
+      <CargarEventoForm
+        open={openFormDialog}
+        onClose={() => setOpenFormDialog(false)}
+        onSubmit={handleSubmitEvento}
+      />
     </Box>
   );
 }

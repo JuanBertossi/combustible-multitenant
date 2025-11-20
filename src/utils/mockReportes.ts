@@ -1,0 +1,267 @@
+import type {
+  ConsumoVehiculoData,
+  LitrosPorSurtidorData,
+  LitrosPorOperadorData,
+  CostoCentroCostoData,
+  DesvioData,
+  RankingEficienciaData,
+} from "../types/reports";
+
+// Mock data para Reporte 1: Consumo por Vehículo
+export const mockConsumoVehiculos: ConsumoVehiculoData[] = [
+  {
+    vehiculoId: 1,
+    vehiculoPatente: "AB123CD",
+    vehiculoTipo: "Mercedes-Benz Actros 2651",
+    litrosTotales: 4250,
+    kmRecorridos: 12574,
+    eficienciaKmPorLitro: 33.8,
+    costoTotal: 1870000,
+    numeroEventos: 12,
+  },
+  {
+    vehiculoId: 2,
+    vehiculoPatente: "EF456GH",
+    vehiculoTipo: "Scania R450",
+    litrosTotales: 3980,
+    kmRecorridos: 12246,
+    eficienciaKmPorLitro: 32.5,
+    costoTotal: 1751200,
+    numeroEventos: 10,
+  },
+  {
+    vehiculoId: 3,
+    vehiculoPatente: "IJ789KL",
+    vehiculoTipo: "Ford Cargo 1723",
+    litrosTotales: 2850,
+    kmRecorridos: 9564,
+    eficienciaKmPorLitro: 29.8,
+    costoTotal: 1254000,
+    numeroEventos: 9,
+  },
+  {
+    vehiculoId: 4,
+    vehiculoPatente: "MN012OP",
+    vehiculoTipo: "John Deere 8R 370",
+    litrosTotales: 5200,
+    horasTrabajadas: 156,
+    eficienciaLitrosPorHora: 33.3,
+    costoTotal: 2288000,
+    numeroEventos: 15,
+  },
+  {
+    vehiculoId: 5,
+    vehiculoPatente: "QR345ST",
+    vehiculoTipo: "Case IH Magnum 340",
+    litrosTotales: 4700,
+    horasTrabajadas: 142,
+    eficienciaLitrosPorHora: 33.1,
+    costoTotal: 2068000,
+    numeroEventos: 14,
+  },
+];
+
+// Mock data para Reporte 2: Litros por Surtidor
+export const mockLitrosPorSurtidor: LitrosPorSurtidorData[] = [
+  {
+    surtidorId: 1,
+    surtidorNombre: "SUR-001 - Surtidor Principal",
+    litrosTotales: 8500,
+    numeroEventos: 28,
+    costoTotal: 3740000,
+  },
+  {
+    surtidorId: 2,
+    surtidorNombre: "SUR-002 - Surtidor Secundario",
+    litrosTotales: 6200,
+    numeroEventos: 19,
+    costoTotal: 2728000,
+  },
+  {
+    surtidorId: 3,
+    surtidorNombre: "SUR-003 - Surtidor Campo",
+    litrosTotales: 4850,
+    numeroEventos: 13,
+    costoTotal: 2134000,
+  },
+  {
+    surtidorId: 4,
+    surtidorNombre: "SUR-004 - Surtidor Taller",
+    litrosTotales: 1430,
+    numeroEventos: 5,
+    costoTotal: 629200,
+  },
+];
+
+// Mock data para Reporte 3: Litros por Operador
+export const mockLitrosPorOperador: LitrosPorOperadorData[] = [
+  {
+    choferId: 1,
+    choferNombre: "Juan",
+    choferApellido: "Pérez",
+    litrosTotales: 6500,
+    numeroEventos: 22,
+    vehiculosMasUsados: ["AB123CD", "EF456GH"],
+  },
+  {
+    choferId: 2,
+    choferNombre: "María",
+    choferApellido: "González",
+    litrosTotales: 5800,
+    numeroEventos: 18,
+    vehiculosMasUsados: ["IJ789KL", "MN012OP"],
+  },
+  {
+    choferId: 3,
+    choferNombre: "Carlos",
+    choferApellido: "Rodriguez",
+    litrosTotales: 4200,
+    numeroEventos: 14,
+    vehiculosMasUsados: ["QR345ST"],
+  },
+  {
+    choferId: 4,
+    choferNombre: "Ana",
+    choferApellido: "Martínez",
+    litrosTotales: 3900,
+    numeroEventos: 11,
+    vehiculosMasUsados: ["AB123CD", "IJ789KL"],
+  },
+];
+
+// Mock data para Reporte 4: Costos por Centro de Costo
+export const mockCostoPorCentroCosto: CostoCentroCostoData[] = [
+  {
+    centroCostoId: 1,
+    centroCostoCodigo: "CC-001",
+    centroCostoNombre: "Transporte",
+    centroCostoTipo: "operacional",
+    litrosTotales: 11080,
+    costoTotal: 4875200,
+    numeroEventos: 31,
+    vehiculosAsignados: 3,
+  },
+  {
+    centroCostoId: 2,
+    centroCostoCodigo: "CC-002",
+    centroCostoNombre: "Lote Norte",
+    centroCostoTipo: "productivo",
+    litrosTotales: 5900,
+    costoTotal: 2596000,
+    numeroEventos: 17,
+    vehiculosAsignados: 2,
+  },
+  {
+    centroCostoId: 3,
+    centroCostoCodigo: "CC-003",
+    centroCostoNombre: "Lote Sur",
+    centroCostoTipo: "productivo",
+    litrosTotales: 3800,
+    costoTotal: 1672000,
+    numeroEventos: 11,
+    vehiculosAsignados: 1,
+  },
+  {
+    centroCostoId: 4,
+    centroCostoCodigo: "CC-004",
+    centroCostoNombre: "Taller y Mantenimiento",
+    centroCostoTipo: "administrativo",
+    litrosTotales: 200,
+    costoTotal: 88000,
+    numeroEventos: 1,
+    vehiculosAsignados: 1,
+  },
+];
+
+// Mock data para Reporte 5: Análisis de Desvíos
+export const mockDesvios: DesvioData[] = [
+  {
+    eventoId: 15,
+    fecha: "2024-01-15T14:30:00Z",
+    vehiculoPatente: "AB123CD",
+    choferNombre: "Juan Pérez",
+    litros: 380,
+    tipoDesvio: "exceso",
+    descripcion: "Exceso de 30 litros (+8.57%) respecto a lo esperado",
+    severidad: "baja",
+  },
+  {
+    eventoId: 23,
+    fecha: "2024-01-22T09:15:00Z",
+    vehiculoPatente: "EF456GH",
+    choferNombre: "María González",
+    litros: 320,
+    tipoDesvio: "duplicado",
+    descripcion: "Posible carga duplicada - verificar evento correlativo",
+    severidad: "alta",
+  },
+  {
+    eventoId: 28,
+    fecha: "2024-01-25T16:45:00Z",
+    vehiculoPatente: "IJ789KL",
+    choferNombre: "Carlos Rodriguez",
+    litros: 315,
+    tipoDesvio: "horario-anomalo",
+    descripcion: "Carga fuera del horario permitido (16:45 hs)",
+    severidad: "media",
+  },
+  {
+    eventoId: 34,
+    fecha: "2024-01-28T11:20:00Z",
+    vehiculoPatente: "MN012OP",
+    choferNombre: "Ana Martínez",
+    litros: 290,
+    tipoDesvio: "ubicacion-invalida",
+    descripcion: "Ubicación GPS fuera del radio permitido",
+    severidad: "alta",
+  },
+];
+
+// Mock data para Reporte 6: Ranking de Eficiencia
+export const mockRankingEficiencia: RankingEficienciaData[] = [
+  {
+    vehiculoId: 5,
+    vehiculoPatente: "QR345ST",
+    vehiculoTipo: "Case IH Magnum 340",
+    eficiencia: 33.1,
+    posicion: 1,
+    litrosTotales: 4700,
+    tendencia: "estable",
+  },
+  {
+    vehiculoId: 4,
+    vehiculoPatente: "MN012OP",
+    vehiculoTipo: "John Deere 8R 370",
+    eficiencia: 33.3,
+    posicion: 2,
+    litrosTotales: 5200,
+    tendencia: "mejorando",
+  },
+  {
+    vehiculoId: 3,
+    vehiculoPatente: "IJ789KL",
+    vehiculoTipo: "Ford Cargo 1723",
+    eficiencia: 29.8,
+    posicion: 3,
+    litrosTotales: 2850,
+    tendencia: "estable",
+  },
+  {
+    vehiculoId: 2,
+    vehiculoPatente: "EF456GH",
+    vehiculoTipo: "Scania R450",
+    eficiencia: 32.5,
+    posicion: 4,
+    litrosTotales: 3980,
+    tendencia: "empeorando",
+  },
+  {
+    vehiculoId: 1,
+    vehiculoPatente: "AB123CD",
+    vehiculoTipo: "Mercedes-Benz Actros 2651",
+    eficiencia: 33.8,
+    posicion: 5,
+    litrosTotales: 4250,
+    tendencia: "empeorando",
+  },
+];

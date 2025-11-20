@@ -1,71 +1,66 @@
 import { useState } from "react";
+import { Box, Typography, Tabs, Tab, Card, Alert } from "@mui/material";
+import PolicyIcon from "@mui/icons-material/Policy";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+
+import PoliticasTab from "../../components/configuracion/PoliticasTab";
+import PreciosTab from "../../components/configuracion/PreciosTab";
+import UmbralesTab from "../../components/configuracion/UmbralesTab";
+import AlertasTab from "../../components/configuracion/AlertasTab";
+
 import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Grid,
-  Divider,
-  Alert,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-} from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
-import { useAuth } from "../../hooks/useAuth";
+  mockPolitica,
+  mockPrecios,
+  mockUmbrales,
+  mockConfiguracionesAlertas,
+} from "../../utils/mockPoliticas";
+import type {
+  PoliticaCombustible,
+  PrecioCombustible,
+  UmbralVehiculo,
+  ConfiguracionAlerta,
+} from "../../types/reports";
 
 export default function Configuracion() {
-  const { user } = useAuth();
+  const [tab, setTab] = useState(0);
+  const [saved, setSaved] = useState(false);
 
-  interface ConfigFormData {
-    nombreEmpresa: string;
-    email: string;
-    telefono: string;
-    whatsappBusiness: string;
-    precioLitro: string;
-    umbralAlerta: string;
-    // --- NUEVOS CAMPOS ---
-    evidenciaFotoOdometro: boolean;
-    evidenciaFotoSurtidor: boolean;
-    evidenciaUbicacion: boolean;
-  }
+  // Estados
+  const [politica, setPolitica] = useState<PoliticaCombustible>(mockPolitica);
+  const [precios, setPrecios] = useState<PrecioCombustible[]>(mockPrecios);
+  const [umbrales, setUmbrales] = useState<UmbralVehiculo[]>(mockUmbrales);
+  const [configuracionesAlertas, setConfiguracionesAlertas] = useState<ConfiguracionAlerta[]>(
+    mockConfiguracionesAlertas
+  );
 
-  const [formData, setFormData] = useState<ConfigFormData>({
-    nombreEmpresa: user?.empresaNombre || "AgroTransporte SA",
-    email: "contacto@empresa.com",
-    telefono: "+54 351 1234567",
-    whatsappBusiness: "+54 351 7654321",
-    precioLitro: "600",
-    umbralAlerta: "80",
-    // --- NUEVOS CAMPOS ---
-    evidenciaFotoOdometro: true,
-    evidenciaFotoSurtidor: false,
-    evidenciaUbicacion: true,
-  });
-  const [saved, setSaved] = useState<boolean>(false);
-
-  const handleSave = (): void => {
+  const handleSave = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+    console.log("Configuración guardada");
   };
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.checked,
-    });
+  const handleToggleAlerta = (tipoAlerta: string, config: ConfiguracionAlerta | undefined) => {
+    if (config) {
+      setConfiguracionesAlertas(
+        configuracionesAlertas.map((c) =>
+          c.id === config.id ? { ...c, habilitada: !c.habilitada } : c
+        )
+      );
+      handleSave();
+    }
   };
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Configuración
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
+          Configuración  
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Configuración general de{" "}
-          {user?.rol === "SuperAdmin" ? "la plataforma" : "la empresa"}
+          Gestión de políticas, precios, umbrales y alertas
         </Typography>
       </Box>
 
@@ -75,179 +70,45 @@ export default function Configuracion() {
         </Alert>
       )}
 
-      <Paper elevation={0} sx={{ border: "1px solid #e0e0e0", p: 4, borderRadius: 2 }}>
-        <Grid container spacing={4}>
-          {/* --- SECCIÓN 1: INFORMACIÓN GENERAL --- */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Información General
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-          </Grid>
+      {/* Tabs */}
+      <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2, mb: 3 }}>
+        <Tabs
+          value={tab}
+          onChange={(_, newValue) => setTab(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            borderBottom: "1px solid #e0e0e0",
+            "& .MuiTab-root": {
+              textTransform: "none",
+              fontWeight: 600,
+              minHeight: 64,
+            },
+          }}
+        >
+          <Tab icon={<PolicyIcon />} iconPosition="start" label="Políticas de Evidencias" />
+          <Tab
+            icon={<LocalGasStationIcon />}
+            iconPosition="start"
+            label="Precios de Combustible"
+          />
+          <Tab icon={<DirectionsCarIcon />} iconPosition="start" label="Umbrales por Vehículo" />
+          <Tab icon={<NotificationsIcon />} iconPosition="start" label="Alertas" />
+        </Tabs>
+      </Card>
 
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Nombre de la Empresa"
-              value={formData.nombreEmpresa}
-              onChange={(e) =>
-                setFormData({ ...formData, nombreEmpresa: e.target.value })
-              }
-            />
-          </Grid>
+      {/* Tab Content */}
+      {tab === 0 && (
+        <PoliticasTab politica={politica} onChange={setPolitica} onSave={handleSave} />
+      )}
 
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              type="email"
-              label="Email de Contacto"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-          </Grid>
+      {tab === 1 && <PreciosTab precios={precios} onUpdate={setPrecios} onSave={handleSave} />}
 
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Teléfono"
-              value={formData.telefono}
-              onChange={(e) =>
-                setFormData({ ...formData, telefono: e.target.value })
-              }
-            />
-          </Grid>
+      {tab === 2 && <UmbralesTab umbrales={umbrales} onUpdate={setUmbrales} onSave={handleSave} />}
 
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="WhatsApp Business"
-              value={formData.whatsappBusiness}
-              onChange={(e) =>
-                setFormData({ ...formData, whatsappBusiness: e.target.value })
-              }
-              helperText="Número para recibir eventos de combustible"
-            />
-          </Grid>
-
-          {/* --- SECCIÓN 2: CONFIGURACIÓN DE COMBUSTIBLE --- */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
-            <Typography
-              variant="h6"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ mt: 3 }}
-            >
-              Configuración de Combustible
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-          </Grid>
-
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Precio por Litro ($)"
-              value={formData.precioLitro}
-              onChange={(e) =>
-                setFormData({ ...formData, precioLitro: e.target.value })
-              }
-              helperText="Precio base del combustible (usado para reportes)"
-            />
-          </Grid>
-
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Umbral de Alerta (%)"
-              value={formData.umbralAlerta}
-              onChange={(e) =>
-                setFormData({ ...formData, umbralAlerta: e.target.value })
-              }
-              helperText="Porcentaje de capacidad de tanque para generar alerta"
-            />
-          </Grid>
-
-          {/* --- SECCIÓN 3: EVIDENCIAS (NUEVA) --- */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
-            <Typography
-              variant="h6"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ mt: 3 }}
-            >
-              Configuración de Evidencias (WhatsApp)
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
-              Define qué evidencias serán obligatorias para el chofer al reportar una carga.
-            </Typography>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.evidenciaFotoOdometro}
-                    onChange={handleCheckboxChange}
-                    name="evidenciaFotoOdometro"
-                  />
-                }
-                label="Requerir Foto del Odómetro/Horímetro"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.evidenciaFotoSurtidor}
-                    onChange={handleCheckboxChange}
-                    name="evidenciaFotoSurtidor"
-                  />
-                }
-                label="Requerir Foto del Surtidor/Factura"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.evidenciaUbicacion}
-                    onChange={handleCheckboxChange}
-                    name="evidenciaUbicacion"
-                  />
-                }
-                label="Requerir Ubicación (GPS)"
-              />
-            </FormGroup>
-          </Grid>
-
-          {/* --- ACCIÓN DE GUARDAR --- */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                sx={{
-                  bgcolor: "#1E2C56",
-                  fontWeight: 600,
-                  "&:hover": { bgcolor: "#16213E" },
-                }}
-              >
-                Guardar Configuración
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+      {tab === 3 && (
+        <AlertasTab configuraciones={configuracionesAlertas} onToggle={handleToggleAlerta} />
+      )}
     </Box>
   );
 }
