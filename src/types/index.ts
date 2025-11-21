@@ -46,9 +46,16 @@ export interface Empresa {
   email?: string;
   tipoMercado: TipoMercado;
   activo: boolean;
+  // Personalización Multi-Tenant
+  logo?: string;
+  colorPrimario?: string;
+  colorSecundario?: string;
   createdAt?: string;
   updatedAt?: string;
 }
+
+// Alias para contexto de Tenant (mismo que Empresa)
+export type Tenant = Empresa;
 
 // ============================================
 // Tipos de Vehículo
@@ -123,25 +130,42 @@ export interface Evento {
 }
 
 // ============================================
+// Tipos de Combustible
+// ============================================
+
+export type TipoCombustible = "Diesel" | "Nafta" | "GNC" | "Nafta Premium";
+
+// ============================================
 // Tipos de Surtidor
 // ============================================
 
 export interface Surtidor {
   id: number;
+  codigo: string;
   nombre: string;
-  ubicacion?: string;
-  activo: boolean;
+  ubicacion: string;
+  tipoCombustible: TipoCombustible;
+  tanqueId: number;
+  tanqueNombre?: string;
   empresaId: number;
   empresaNombre?: string;
+  activo: boolean;
+  ultimaRecarga?: string;
+  lecturaActual?: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface SurtidorExtended extends Surtidor {
-  codigo?: string;
-  tipoCombustible?: string;
-  empresa?: string;
-}
+// Alias para compatibilidad con código existente
+// Hace tanqueId opcional para permitir creación sin tanque asignado
+export type SurtidorExtended = Omit<Surtidor, 'tanqueId' | 'tipoCombustible'> & {
+  tanqueId?: number; // Opcional para permitir creación sin tanque
+  tipoCombustible: string; // Más flexible que TipoCombustible
+  empresa?: string; // Alias de empresaNombre
+};
+
+
+
 
 // ============================================
 // Tipos de Tanque
@@ -149,15 +173,40 @@ export interface SurtidorExtended extends Surtidor {
 
 export interface Tanque {
   id: number;
+  codigo: string;
   nombre: string;
-  capacidadMaxima: number;
+  tipoCombustible: TipoCombustible;
+  capacidadTotal: number;
   nivelActual: number;
-  ubicacion?: string;
-  activo: boolean;
+  nivelMinimo: number;
+  ubicacion: string;
   empresaId: number;
   empresaNombre?: string;
+  activo: boolean;
+  ultimaRecarga?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface TanqueExtended extends Omit<Tanque, 'codigo' | 'tipoCombustible'> {
+  codigo?: string;
+  tipoCombustible?: string; // Override para permitir string genérico
+  empresa?: string;
+}
+
+export interface EventoExtended extends Evento {
+  vehiculo?: string;
+  chofer?: string;
+  surtidor?: string;
+  empresa?: string;
+  lote?: string;
+  labor?: string;
+  costo?: number;
+}
+
+export interface UsuarioExtended extends Usuario {
+  apellido?: string;
+  whatsapp?: string;
 }
 
 // ============================================

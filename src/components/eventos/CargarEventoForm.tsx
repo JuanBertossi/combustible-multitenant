@@ -102,11 +102,9 @@ export default function CargarEventoForm({
 
   const steps = ["Datos Básicos", "Mediciones", "Evidencias", "Confirmar"];
 
-  // Validar en tiempo real cuando cambian datos relevantes
+  // Limpiar validación cuando cambian los datos para obligar a revalidar al avanzar
   useEffect(() => {
-    if (activeStep > 0) {
-      validateCurrentData();
-    }
+    setValidationResult(null);
   }, [
     formData.litros,
     formData.odometro,
@@ -115,11 +113,12 @@ export default function CargarEventoForm({
     formData.evidenciaAudio,
     formData.latitud,
     formData.vehiculoId,
-    activeStep
   ]);
 
-  const validateCurrentData = () => {
-    if (!formData.vehiculoId || !formData.litros) return;
+  // La validación se ejecutará al intentar avanzar de paso
+
+  const getValidationResult = (): ValidationResult | null => {
+    if (!formData.vehiculoId || !formData.litros) return null;
 
     const selectedVehiculo = mockVehiculos.find(v => v.id === formData.vehiculoId);
     const umbral = mockUmbrales.find(u => u.vehiculoId === formData.vehiculoId);
@@ -131,27 +130,23 @@ export default function CargarEventoForm({
       vehiculoPatente: selectedVehiculo?.patente || "",
       litros: formData.litros,
       kmFinal: formData.odometro || undefined,
-      // Estimamos kmInicial para calcular rendimiento si hay odómetro
-      kmInicial: formData.odometro ? formData.odometro - (selectedVehiculo?.rendimientoPromedio ? formData.litros * selectedVehiculo.rendimientoPromedio : 0) : undefined,
       latitud: formData.latitud || undefined,
       longitud: formData.longitud || undefined,
     };
 
     // Construir evidencias parciales
     const evidenciasParciales: Evidencia[] = [
-      ...formData.evidenciasFotos.map((_, i) => ({ tipo: "foto-surtidor", url: "temp" } as Evidencia)), // Asumimos tipo genérico para validar cantidad
+      ...formData.evidenciasFotos.map(() => ({ tipo: "foto-surtidor", url: "temp" } as Evidencia)), // Asumimos tipo genérico para validar cantidad
       ...(formData.evidenciaAudio ? [{ tipo: "audio", url: "temp" } as Evidencia] : []),
       ...(formData.latitud ? [{ tipo: "ubicacion", url: "temp" } as Evidencia] : []),
     ];
 
-    const result = validarEventoConPoliticas(
+    return validarEventoConPoliticas(
       eventoParcial as Evento,
       evidenciasParciales,
       mockPolitica,
       umbral
     );
-
-    setValidationResult(result);
   };
 
   // Obtener ubicación GPS
@@ -200,9 +195,39 @@ export default function CargarEventoForm({
   };
 
   const handleNext = () => {
-    if (validateStep(activeStep)) {
-      setActiveStep((prev) => prev + 1);
+    if (!validateStep(activeStep)) return;
+
+    // Validación de políticas al salir del paso de Mediciones (Step 1)
+    if (activeStep === 1) {
+      const result = getValidationResult();
+      
+      // Filtrar errores de evidencias y geolocalización para este paso
+      // ya que se cargan en el siguiente paso
+      if (result) {
+        const erroresFiltrados = result.errores.filter(
+          e => e.tipo !== "evidencia" && e.tipo !== "geolocation"
+        );
+        
+        // Actualizamos el resultado visible pero mantenemos el original internamente si fuera necesario
+        // Para la UI, mostramos solo lo relevante al paso actual + advertencias
+        setValidationResult({
+          ...result,
+          errores: erroresFiltrados
+        });
+
+        // Si hay errores (excluyendo evidencias), bloqueamos siempre
+        if (erroresFiltrados.length > 0) {
+          return;
+        }
+
+        // Si hay advertencias y NO las habíamos mostrado antes (o el usuario cambió algo), bloqueamos una vez
+        if (result.advertencias.length > 0 && !validationResult) {
+          return;
+        }
+      }
     }
+
+    setActiveStep((prev) => prev + 1);
   };
 
   const handleBack = () => {

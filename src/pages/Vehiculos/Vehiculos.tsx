@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -15,6 +15,7 @@ import {
   CardContent,
   Chip,
   IconButton,
+  LinearProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -22,10 +23,13 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { mockVehiculos } from "../../utils/mockData";
+import { vehiculoService } from "../../services/VehiculoService";
 import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import { TIPOS_VEHICULO } from "../../utils/constants";
 import * as XLSX from "xlsx";
+import PermissionGuard from "../../components/common/PermissionGuard";
+import { PERMISSIONS } from "../../utils/permissions";
 import type { Vehiculo, TipoVehiculo, FormErrors } from "../../types";
 
 interface VehiculoFormData {
@@ -40,9 +44,25 @@ interface VehiculoFormData {
 
 export default function Vehiculos() {
   const { user } = useAuth();
-  const [vehiculos, setVehiculos] = useState<Vehiculo[]>(
-    mockVehiculos as Vehiculo[]
-  );
+  const { currentTenant } = useTenant();
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    loadVehiculos();
+  }, []);
+
+  const loadVehiculos = async () => {
+    setLoading(true);
+    try {
+      const data = await vehiculoService.getAll();
+      setVehiculos(data);
+    } catch (error) {
+      console.error("Error loading vehiculos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null);
@@ -60,10 +80,10 @@ export default function Vehiculos() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const vehiculosPorEmpresa =
-    user?.rol === "SuperAdmin"
-      ? vehiculos
-      : vehiculos.filter((v) => v.empresaId === user?.empresaId);
+  // Filtrar vehículos por tenant actual
+  const vehiculosPorEmpresa = vehiculos.filter(
+    (v) => v.empresaId === currentTenant?.id
+  );
 
   const filteredVehiculos = vehiculosPorEmpresa.filter((v) => {
     const matchSearch =
@@ -144,39 +164,36 @@ export default function Vehiculos() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (): void => {
+  const handleSave = async () => {
     if (!validate()) return;
-    if (editingVehiculo) {
-      setVehiculos(
-        vehiculos.map((v) =>
-          v.id === editingVehiculo.id
-            ? {
-                ...editingVehiculo,
-                patente: formData.patente,
-                tipo: formData.tipo,
-                marca: formData.marca,
-                modelo: formData.modelo,
-                anio: formData.anio,
-                activo: formData.activo,
-              }
-            : v
-        )
-      );
-    } else {
-      const newVehiculo: Vehiculo = {
-        id: Math.max(...vehiculos.map((v) => v.id)) + 1,
-        patente: formData.patente,
-        tipo: formData.tipo,
-        marca: formData.marca,
-        modelo: formData.modelo,
-        anio: formData.anio,
-        activo: formData.activo,
-        empresaId: user?.empresaId || 0,
-        empresaNombre: user?.empresaNombre,
-      };
-      setVehiculos([...vehiculos, newVehiculo]);
+    
+    try {
+      if (editingVehiculo) {
+        await vehiculoService.update(editingVehiculo.id, {
+          patente: formData.patente,
+          tipo: formData.tipo,
+          marca: formData.marca,
+          modelo: formData.modelo,
+          anio: formData.anio,
+          activo: formData.activo,
+        });
+      } else {
+        await vehiculoService.create({
+          patente: formData.patente,
+          tipo: formData.tipo,
+          marca: formData.marca,
+          modelo: formData.modelo,
+          anio: formData.anio,
+          activo: formData.activo,
+          empresaId: currentTenant?.id || 0,
+          empresaNombre: currentTenant?.nombre,
+        });
+      }
+      await loadVehiculos();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving vehiculo:", error);
     }
-    setOpenDialog(false);
   };
 
   const handleDeleteClick = (vehiculo: Vehiculo): void => {
@@ -184,9 +201,14 @@ export default function Vehiculos() {
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async () => {
     if (deleteVehiculo) {
-      setVehiculos(vehiculos.filter((v) => v.id !== deleteVehiculo.id));
+      try {
+        await vehiculoService.delete(deleteVehiculo.id);
+        await loadVehiculos();
+      } catch (error) {
+        console.error("Error deleting vehiculo:", error);
+      }
     }
     setOpenDeleteDialog(false);
     setDeleteVehiculo(null);
@@ -210,6 +232,7 @@ export default function Vehiculos() {
     <Box>
       {/* Header mejorado */}
       <Box sx={{ mb: 4 }}>
+        {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
         <Box
           sx={{
             display: "flex",

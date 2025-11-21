@@ -1,5 +1,5 @@
 // Datos hardcodeados para el MVP
-import type { Evento, CentroCosto, SurtidorExtended } from "../types";
+import type { Evento, CentroCosto, Surtidor, Tanque } from "../types";
 export const mockUser = {
   id: 1,
   nombre: "Juan",
@@ -10,7 +10,7 @@ export const mockUser = {
   empresa: "AgroTransporte SA",
 };
 
-export const mockSurtidores: SurtidorExtended[] = [
+export const mockSurtidores: Surtidor[] = [
   {
     id: 1,
     codigo: "SUR-001",
@@ -98,22 +98,34 @@ export const mockEmpresas = [
     id: 1,
     nombre: "AgroTransporte SA",
     cuit: "30-12345678-9",
-    tipoMercado: "Agro",
+    tipoMercado: "Agro" as const,
     activo: true,
+    // Personalización Multi-Tenant
+    logo: "/logos/agrotransporte.png",
+    colorPrimario: "#1E2C56",
+    colorSecundario: "#10b981",
   },
   {
     id: 2,
     nombre: "Logística del Sur",
     cuit: "30-87654321-0",
-    tipoMercado: "Transporte",
+    tipoMercado: "Transporte" as const,
     activo: true,
+    // Personalización Multi-Tenant
+    logo: "/logos/logistica-sur.png",
+    colorPrimario: "#3b82f6",
+    colorSecundario: "#f59e0b",
   },
   {
     id: 3,
     nombre: "Campo Verde SRL",
     cuit: "30-11223344-5",
-    tipoMercado: "Agro",
+    tipoMercado: "Agro" as const,
     activo: false,
+    // Personalización Multi-Tenant
+    logo: "/logos/campo-verde.png",
+    colorPrimario: "#059669",
+    colorSecundario: "#84cc16",
   },
 ];
 
@@ -186,6 +198,7 @@ export const mockVehiculos = [
     modelo: "Atego 1726",
     anio: 2020,
     capacidad: 300,
+    capacidadTanque: 300, // Litros - capacidad del tanque de combustible
     activo: true,
   },
   {
@@ -198,6 +211,7 @@ export const mockVehiculos = [
     modelo: "6110J",
     anio: 2019,
     capacidad: 250,
+    capacidadTanque: 250, // Litros
     activo: true,
   },
   {
@@ -210,6 +224,7 @@ export const mockVehiculos = [
     modelo: "R450",
     anio: 2021,
     capacidad: 400,
+    capacidadTanque: 400, // Litros
     activo: true,
   },
   {
@@ -222,6 +237,7 @@ export const mockVehiculos = [
     modelo: "27000",
     anio: 2018,
     capacidad: 180,
+    capacidadTanque: 180, // Litros
     activo: true,
   },
   {
@@ -234,6 +250,7 @@ export const mockVehiculos = [
     modelo: "Tector",
     anio: 2017,
     capacidad: 280,
+    capacidadTanque: 280, // Litros
     activo: false,
   },
 ];
@@ -516,3 +533,99 @@ export const consumoTemporal = [
   { fecha: "27/10", litros: 550 },
   { fecha: "28/10", litros: 420 },
 ];
+
+// ============================================
+// Mock Data para Tanques
+// ============================================
+
+export const mockTanques = [
+  {
+    id: 1,
+    codigo: "TNQ-001",
+    nombre: "Tanque Diesel 10000L",
+    tipoCombustible: "Diesel" as const,
+    capacidadTotal: 10000,
+    nivelActual: 7500,
+    nivelMinimo: 2000,
+    ubicacion: "Depósito Principal",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: true,
+    ultimaRecarga: "2025-01-15T10:30:00",
+  },
+  {
+    id: 2,
+    codigo: "TNQ-002",
+    nombre: "Tanque Nafta 5000L",
+    tipoCombustible: "Nafta" as const,
+    capacidadTotal: 5000,
+    nivelActual: 1800,
+    nivelMinimo: 1000,
+    ubicacion: "Depósito Principal",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: true,
+    ultimaRecarga: "2025-01-16T14:20:00",
+  },
+  {
+    id: 3,
+    codigo: "TNQ-003",
+    nombre: "Tanque GNC 3000L",
+    tipoCombustible: "GNC" as const,
+    capacidadTotal: 3000,
+    nivelActual: 2800,
+    nivelMinimo: 500,
+    ubicacion: "Playa de Carga",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: true,
+    ultimaRecarga: "2025-01-14T09:15:00",
+  },
+];
+
+// ============================================
+// Mock Data para Surtidores (Actualizado)
+// ============================================
+
+export const mockSurtidoresNew = [
+  {
+    id: 1,
+    codigo: "SURT-001",
+    nombre: "Surtidor Principal Diesel",
+    ubicacion: "Playa de carga - Sector A",
+    tipoCombustible: "Diesel" as const,
+    tanqueId: 1,
+    tanqueNombre: "Tanque Diesel 10000L",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: true,
+    lecturaActual: 125430,
+  },
+  {
+    id: 2,
+    codigo: "SURT-002",
+    nombre: "Surtidor Nafta Premium",
+    ubicacion: "Playa de carga - Sector B",
+    tipoCombustible: "Nafta" as const,
+    tanqueId: 2,
+    tanqueNombre: "Tanque Nafta 5000L",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: true,
+    lecturaActual: 89250,
+  },
+  {
+    id: 3,
+    codigo: "SURT-003",
+    nombre: "Surtidor GNC",
+    ubicacion: "Playa de carga - Sector C",
+    tipoCombustible: "GNC" as const,
+    tanqueId: 3,
+    tanqueNombre: "Tanque GNC 3000L",
+    empresaId: 1,
+    empresaNombre: "Empresa Demo",
+    activo: false,
+    lecturaActual: 45680,
+  },
+];
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -17,6 +17,7 @@ import {
   Chip,
   IconButton,
 } from "@mui/material";
+import LinearProgress from "@mui/material/LinearProgress";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
@@ -24,8 +25,9 @@ import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { mockUsuarios } from "../../utils/mockData";
+import { usuarioService } from "../../services/UsuarioService";
 import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import { ROLES } from "../../utils/constants";
 import * as XLSX from "xlsx";
 import type { Usuario, UserRole, FormErrors } from "../../types";
@@ -53,9 +55,9 @@ const roles: UserRole[] = [
 
 export default function Usuarios() {
   const { user } = useAuth();
-  const [usuarios, setUsuarios] = useState<UsuarioExtended[]>(
-    mockUsuarios as UsuarioExtended[]
-  );
+  const { currentTenant } = useTenant();
+  const [usuarios, setUsuarios] = useState<UsuarioExtended[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingUsuario, setEditingUsuario] = useState<UsuarioExtended | null>(
@@ -76,10 +78,19 @@ export default function Usuarios() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const usuariosPorEmpresa =
-    user?.rol === "SuperAdmin"
-      ? usuarios
-      : usuarios.filter((u) => u.empresaId === user?.empresaId);
+  // Load usuarios on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await usuarioService.getAll();
+      setUsuarios(data);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const usuariosPorEmpresa = usuarios.filter(
+    (u) => u.empresaId === currentTenant?.id
+  );
 
   const filteredUsuarios = usuariosPorEmpresa.filter((u) => {
     const matchSearch =
@@ -163,38 +174,33 @@ export default function Usuarios() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!validate()) return;
 
     if (editingUsuario) {
-      setUsuarios(
-        usuarios.map((u) =>
-          u.id === editingUsuario.id
-            ? {
-                ...editingUsuario,
-                nombre: formData.nombre,
-                apellido: formData.apellido,
-                email: formData.email,
-                whatsapp: formData.whatsapp,
-                rol: formData.rol,
-                activo: formData.activo,
-              }
-            : u
-        )
-      );
-    } else {
-      const newUsuario: UsuarioExtended = {
-        id: Math.max(...usuarios.map((u) => u.id), 0) + 1,
+      const updated = await usuarioService.update(editingUsuario.id, {
         nombre: formData.nombre,
         apellido: formData.apellido,
         email: formData.email,
         whatsapp: formData.whatsapp,
         rol: formData.rol,
         activo: formData.activo,
-        empresaId: user?.empresaId,
-        empresaNombre: user?.empresaNombre,
-      };
-      setUsuarios([...usuarios, newUsuario]);
+        empresaId: currentTenant?.id,
+        empresaNombre: currentTenant?.nombre,
+      } as any);
+      setUsuarios(usuarios.map((u) => (u.id === updated.id ? updated : u)));
+    } else {
+      const created = await usuarioService.create({
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        whatsapp: formData.whatsapp,
+        rol: formData.rol,
+        activo: formData.activo,
+        empresaId: currentTenant?.id,
+        empresaNombre: currentTenant?.nombre,
+      } as any);
+      setUsuarios([...usuarios, created]);
     }
 
     setOpenDialog(false);
@@ -205,19 +211,14 @@ export default function Usuarios() {
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async (): Promise<void> => {
     if (deleteUsuario) {
+      await usuarioService.delete(deleteUsuario.id);
       setUsuarios(usuarios.filter((u) => u.id !== deleteUsuario.id));
     }
     setOpenDeleteDialog(false);
     setDeleteUsuario(null);
   };
-
-  const getInitials = (nombre: string, apellido: string): string => {
-    return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
-  };
-
-  const getAvatarColor = (nombre: string): string => {
     const colors = [
       "#3b82f6",
       "#10b981",
@@ -239,6 +240,14 @@ export default function Usuarios() {
     };
     return colors[rol] || { bg: "#99999915", color: "#999" };
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <LinearProgress sx={{ width: "50%" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -26,16 +26,12 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WarningIcon from "@mui/icons-material/Warning";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import * as XLSX from "xlsx";
-import type { Tanque, FormErrors } from "../../types";
+import { tanqueService } from "../../services/TanqueService";
+import type { TanqueExtended, FormErrors } from "../../types";
 
 const TIPOS_COMBUSTIBLE: string[] = ["Diésel", "Nafta", "GNC", "GLP"];
-
-interface TanqueExtended extends Tanque {
-  codigo?: string;
-  tipoCombustible?: string;
-  empresa?: string;
-}
 
 interface TanqueFormData {
   codigo: string;
@@ -47,49 +43,11 @@ interface TanqueFormData {
   activo: boolean;
 }
 
-// Mock data
-export const mockTanques: TanqueExtended[] = [
-  {
-    id: 1,
-    codigo: "TNQ-001",
-    nombre: "Tanque Principal Diésel",
-    ubicacion: "Estación Central",
-    tipoCombustible: "Diésel",
-    capacidadMaxima: 10000,
-    nivelActual: 7500,
-    empresaId: 1,
-    empresa: "AgroTransporte SA",
-    activo: true,
-  },
-  {
-    id: 2,
-    codigo: "TNQ-002",
-    nombre: "Tanque Campo Norte",
-    ubicacion: "Lote 45",
-    tipoCombustible: "Diésel",
-    capacidadMaxima: 5000,
-    nivelActual: 1200,
-    empresaId: 1,
-    empresa: "AgroTransporte SA",
-    activo: true,
-  },
-  {
-    id: 3,
-    codigo: "TNQ-003",
-    nombre: "Tanque Nafta Premium",
-    ubicacion: "Planta Industrial",
-    tipoCombustible: "Nafta",
-    capacidadMaxima: 8000,
-    nivelActual: 6800,
-    empresaId: 2,
-    empresa: "Transportes del Sur",
-    activo: true,
-  },
-];
-
 export default function Tanques() {
   const { user } = useAuth();
-  const [tanques, setTanques] = useState<TanqueExtended[]>(mockTanques);
+  const { currentTenant } = useTenant();
+  const [tanques, setTanques] = useState<TanqueExtended[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingTanque, setEditingTanque] = useState<TanqueExtended | null>(
@@ -109,10 +67,25 @@ export default function Tanques() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const tanquesPorEmpresa =
-    user?.rol === "SuperAdmin"
-      ? tanques
-      : tanques.filter((t) => t.empresaId === user?.empresaId);
+  useEffect(() => {
+    loadTanques();
+  }, []);
+
+  const loadTanques = async () => {
+    setLoading(true);
+    try {
+      const data = await tanqueService.getAll();
+      setTanques(data);
+    } catch (error) {
+      console.error("Error loading tanques:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tanquesPorEmpresa = tanques.filter(
+    (t) => t.empresaId === currentTenant?.id
+  );
 
   const filteredTanques = tanquesPorEmpresa.filter((t) => {
     const matchSearch =
@@ -214,7 +187,7 @@ export default function Tanques() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (): void => {
+  const handleSave = async () => {
     if (!validate()) return;
     const capacidad =
       typeof formData.capacidadMaxima === "string"
@@ -225,39 +198,28 @@ export default function Tanques() {
         ? parseFloat(formData.nivelActual)
         : formData.nivelActual;
 
-    if (editingTanque) {
-      setTanques(
-        tanques.map((t) =>
-          t.id === editingTanque.id
-            ? {
-                ...t,
-                codigo: formData.codigo,
-                nombre: formData.nombre,
-                ubicacion: formData.ubicacion,
-                tipoCombustible: formData.tipoCombustible,
-                capacidadMaxima: capacidad,
-                nivelActual: nivel,
-                activo: formData.activo,
-              }
-            : t
-        )
-      );
-    } else {
-      const newTanque: TanqueExtended = {
-        id: Math.max(...tanques.map((t) => t.id), 0) + 1,
-        codigo: formData.codigo,
-        nombre: formData.nombre,
-        ubicacion: formData.ubicacion,
-        tipoCombustible: formData.tipoCombustible,
-        capacidadMaxima: capacidad,
-        nivelActual: nivel,
-        activo: formData.activo,
-        empresaId: user?.empresaId || 0,
-        empresa: user?.empresaNombre,
-      };
-      setTanques([...tanques, newTanque]);
+    try {
+      if (editingTanque) {
+        await tanqueService.update(editingTanque.id, {
+          ...formData,
+          capacidadMaxima: capacidad,
+          nivelActual: nivel,
+          empresaId: editingTanque.empresaId, // Mantener empresa original
+        });
+      } else {
+        await tanqueService.create({
+          ...formData,
+          capacidadMaxima: capacidad,
+          nivelActual: nivel,
+          empresaId: currentTenant?.id || 0,
+          empresa: currentTenant?.nombre,
+        });
+      }
+      await loadTanques();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving tanque:", error);
     }
-    setOpenDialog(false);
   };
 
   const handleDeleteClick = (tanque: TanqueExtended): void => {
@@ -265,9 +227,14 @@ export default function Tanques() {
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async () => {
     if (deleteTanque) {
-      setTanques(tanques.filter((t) => t.id !== deleteTanque.id));
+      try {
+        await tanqueService.delete(deleteTanque.id);
+        await loadTanques();
+      } catch (error) {
+        console.error("Error deleting tanque:", error);
+      }
     }
     setOpenDeleteDialog(false);
     setDeleteTanque(null);
@@ -299,6 +266,7 @@ export default function Tanques() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
+        {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
         <Box
           sx={{
             display: "flex",

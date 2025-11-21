@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -16,6 +16,7 @@ import {
   Chip,
   IconButton,
   Alert,
+  LinearProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,9 +25,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { mockChoferes } from "../../utils/mockData";
 import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import * as XLSX from "xlsx";
+import { choferService } from "../../services/ChoferService";
 import type { Chofer, FormErrors } from "../../types";
 
 interface ChoferFormData {
@@ -40,7 +42,9 @@ interface ChoferFormData {
 
 export default function Choferes() {
   const { user } = useAuth();
-  const [choferes, setChoferes] = useState<Chofer[]>(mockChoferes);
+  const { currentTenant } = useTenant();
+  const [choferes, setChoferes] = useState<Chofer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingChofer, setEditingChofer] = useState<Chofer | null>(null);
@@ -56,10 +60,25 @@ export default function Choferes() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const choferesPorEmpresa =
-    user?.rol === "SuperAdmin"
-      ? choferes
-      : choferes.filter((c) => c.empresaId === user?.empresaId);
+  useEffect(() => {
+    loadChoferes();
+  }, []);
+
+  const loadChoferes = async () => {
+    setLoading(true);
+    try {
+      const data = await choferService.getAll();
+      setChoferes(data);
+    } catch (error) {
+      console.error("Error loading choferes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const choferesPorEmpresa = choferes.filter(
+    (c) => c.empresaId === currentTenant?.id
+  );
 
   const filteredChoferes = choferesPorEmpresa.filter((c) => {
     return (
@@ -137,37 +156,29 @@ export default function Choferes() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (): void => {
+  const handleSave = async () => {
     if (!validate()) return;
-    if (editingChofer) {
-      setChoferes(
-        choferes.map((c) =>
-          c.id === editingChofer.id
-            ? {
-                ...editingChofer,
-                nombre: formData.nombre,
-                apellido: formData.apellido,
-                dni: formData.dni,
-                telefono: formData.whatsapp,
-                activo: formData.activo,
-              }
-            : c
-        )
-      );
-    } else {
-      const newChofer: Chofer = {
-        id: Math.max(...choferes.map((c) => c.id), 0) + 1,
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        dni: formData.dni,
-        telefono: formData.whatsapp,
-        activo: formData.activo,
-        empresaId: user?.empresaId || 0,
-        empresaNombre: user?.empresaNombre,
-      };
-      setChoferes([...choferes, newChofer]);
+    
+    try {
+      if (editingChofer) {
+        await choferService.update(editingChofer.id, {
+          ...formData,
+          telefono: formData.whatsapp,
+          empresaId: editingChofer.empresaId, // Mantener empresa original
+        });
+      } else {
+        await choferService.create({
+          ...formData,
+          telefono: formData.whatsapp,
+          empresaId: currentTenant?.id || 0,
+          empresaNombre: currentTenant?.nombre,
+        });
+      }
+      await loadChoferes();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving chofer:", error);
     }
-    setOpenDialog(false);
   };
 
   const handleDeleteClick = (chofer: Chofer): void => {
@@ -175,9 +186,14 @@ export default function Choferes() {
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async () => {
     if (deleteChofer) {
-      setChoferes(choferes.filter((c) => c.id !== deleteChofer.id));
+      try {
+        await choferService.delete(deleteChofer.id);
+        await loadChoferes();
+      } catch (error) {
+        console.error("Error deleting chofer:", error);
+      }
     }
     setOpenDeleteDialog(false);
     setDeleteChofer(null);
@@ -204,6 +220,7 @@ export default function Choferes() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
+        {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
         <Box
           sx={{
             display: "flex",

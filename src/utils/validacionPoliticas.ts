@@ -2,9 +2,10 @@ import type {
   Evento,
   Evidencia,
   PoliticaCombustible,
-  UmbralVehiculo, 
+  UmbralVehiculo,
   TipoEvidencia,
 } from "../types/reports";
+import { mockVehiculos } from "./mockData";
 
 /**
  * Resultado de validación de un evento
@@ -145,41 +146,67 @@ export function validarEventoConPoliticas(
   }
 
   // ============================================
-  // 5. Validar Umbral de Vehículo
+  // 5. Validar Capacidad del Tanque y Estimar Autonomía
   // ============================================
 
   if (umbral && umbral.activo) {
-    // Validar consumo máximo
+    // Obtener el vehículo para validar capacidad del tanque
+    const vehiculo = mockVehiculos.find((v) => v.id === evento.vehiculoId);
+
+    if (vehiculo) {
+      // Validar que no exceda la capacidad del tanque
+      const capacidadTanque = vehiculo.capacidadTanque || vehiculo.capacidad || 0;
+      
+      if (evento.litros > capacidadTanque) {
+        errores.push({
+          tipo: "litros",
+          mensaje: `La carga (${evento.litros}L) excede la capacidad del tanque (${capacidadTanque}L)`,
+          severidad: "alta",
+        });
+      }
+
+      // Estimar autonomía basada en el consumo promedio
+      if (umbral.consumoPromedioEsperado && evento.litros > 0) {
+        // Detectar si es vehículo de transporte (L/100km) o maquinaria (L/hora)
+        const esMaquinaria = vehiculo.tipo && 
+          (vehiculo.tipo.toLowerCase().includes("tractor") ||
+           vehiculo.tipo.toLowerCase().includes("sembradora") ||
+           vehiculo.tipo.toLowerCase().includes("cosechadora") ||
+           vehiculo.tipo.toLowerCase().includes("pulverizadora"));
+
+        if (esMaquinaria) {
+          // Para maquinaria: consumo en L/hora
+          const horasEstimadas = evento.litros / umbral.consumoPromedioEsperado;
+          advertencias.push({
+            tipo: "eficiencia",
+            mensaje: `Con ${evento.litros}L podrás operar aproximadamente ${horasEstimadas.toFixed(1)} horas`,
+          });
+        } else {
+          // Para vehículos de transporte: consumo en L/100km
+          const kmEstimados = (evento.litros / umbral.consumoPromedioEsperado) * 100;
+          advertencias.push({
+            tipo: "eficiencia",
+            mensaje: `Con ${evento.litros}L podrás recorrer aproximadamente ${kmEstimados.toFixed(0)} km`,
+          });
+        }
+      }
+
+      // Advertencia si la carga es muy baja (menos del 20% de la capacidad)
+      if (capacidadTanque > 0 && evento.litros < capacidadTanque * 0.2) {
+        advertencias.push({
+          tipo: "eficiencia",
+          mensaje: `Carga baja: solo ${((evento.litros / capacidadTanque) * 100).toFixed(0)}% de la capacidad del tanque`,
+        });
+      }
+    }
+
+    // Validar consumo máximo configurado (si existe)
     if (umbral.consumoMaximoLitros && evento.litros > umbral.consumoMaximoLitros) {
       errores.push({
         tipo: "umbral",
-        mensaje: `Excede consumo máximo del vehículo (${umbral.consumoMaximoLitros}L). Cargados: ${evento.litros}L`,
+        mensaje: `Excede el límite máximo de carga configurado (${umbral.consumoMaximoLitros}L)`,
         severidad: "alta",
       });
-    }
-
-    // Validar tolerancia de desvío
-    if (umbral.consumoPromedioEsperado && umbral.toleranciaDesvio) {
-      const desvio = Math.abs(
-        ((evento.litros - umbral.consumoPromedioEsperado) / umbral.consumoPromedioEsperado) * 100
-      );
-
-      if (desvio > umbral.toleranciaDesvio) {
-        const severidad: "alta" | "media" | "baja" =
-          desvio > umbral.toleranciaDesvio * 1.5 ? "alta" : "media";
-
-        errores.push({
-          tipo: "umbral",
-          mensaje: `Desvío de ${desvio.toFixed(1)}% excede tolerancia configurada (±${umbral.toleranciaDesvio}%)`,
-          severidad,
-        });
-      } else if (desvio > umbral.toleranciaDesvio * 0.7) {
-        // Advertencia si está cerca del límite
-        advertencias.push({
-          tipo: "desvio",
-          mensaje: `Desvío de ${desvio.toFixed(1)}% cercano al límite (±${umbral.toleranciaDesvio}%)`,
-        });
-      }
     }
   }
 

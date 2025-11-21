@@ -20,6 +20,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import type { UserRole } from "../../types";
+import TenantSelector from "../common/TenantSelector";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -146,6 +147,9 @@ export default function Header() {
 
         {/* Right side */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+          {/* Tenant Selector (Solo SuperAdmin) */}
+          <TenantSelector />
+
           {/* Notificaciones */}
           <IconButton sx={commonIconButtonStyle}>
             <Badge

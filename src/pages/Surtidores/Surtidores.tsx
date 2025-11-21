@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -15,6 +15,7 @@ import {
   CardContent,
   Chip,
   IconButton,
+  LinearProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,15 +25,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import * as XLSX from "xlsx";
-// --- IMPORTACIONES CORREGIDAS ---
-import { mockSurtidores } from "../../utils/mockData";
+import { surtidorService } from "../../services/SurtidorService";
 import type { SurtidorExtended, FormErrors } from "../../types";
-// --- FIN DE CORRECCIÓN ---
 
 const TIPOS_COMBUSTIBLE: string[] = ["Diésel", "Nafta", "GNC", "GLP"];
-
-// (La interfaz SurtidorExtended se movió a types/index.ts)
 
 interface SurtidorFormData {
   codigo: string;
@@ -42,20 +40,15 @@ interface SurtidorFormData {
   activo: boolean;
 }
 
-// (La constante mockSurtidores se movió a utils/mockData.ts)
-
 export default function Surtidores() {
   const { user } = useAuth();
-  // --- USA EL mockSurtidores IMPORTADO ---
-  const [surtidores, setSurtidores] =
-    useState<SurtidorExtended[]>(mockSurtidores);
+  const { currentTenant } = useTenant();
+  const [surtidores, setSurtidores] = useState<SurtidorExtended[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingSurtidor, setEditingSurtidor] =
-    useState<SurtidorExtended | null>(null);
-  const [deleteSurtidor, setDeleteSurtidor] = useState<SurtidorExtended | null>(
-    null
-  );
+  const [editingSurtidor, setEditingSurtidor] = useState<SurtidorExtended | null>(null);
+  const [deleteSurtidor, setDeleteSurtidor] = useState<SurtidorExtended | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterTipo, setFilterTipo] = useState<string>("Todos");
   const [formData, setFormData] = useState<SurtidorFormData>({
@@ -67,10 +60,25 @@ export default function Surtidores() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const surtidoresPorEmpresa =
-    user?.rol === "SuperAdmin"
-      ? surtidores
-      : surtidores.filter((s) => s.empresaId === user?.empresaId);
+  useEffect(() => {
+    loadSurtidores();
+  }, []);
+
+  const loadSurtidores = async () => {
+    setLoading(true);
+    try {
+      const data = await surtidorService.getAll();
+      setSurtidores(data);
+    } catch (error) {
+      console.error("Error loading surtidores:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const surtidoresPorEmpresa = surtidores.filter(
+    (s) => s.empresaId === currentTenant?.id
+  );
 
   const filteredSurtidores = surtidoresPorEmpresa.filter((s) => {
     const matchSearch =
@@ -141,24 +149,27 @@ export default function Surtidores() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (): void => {
+  const handleSave = async () => {
     if (!validate()) return;
-    if (editingSurtidor) {
-      setSurtidores(
-        surtidores.map((s) =>
-          s.id === editingSurtidor.id ? { ...s, ...formData } : s
-        )
-      );
-    } else {
-      const newSurtidor: SurtidorExtended = {
-        ...formData,
-        id: Math.max(...surtidores.map((s) => s.id), 0) + 1,
-        empresaId: user?.empresaId || 0,
-        empresa: user?.empresaNombre,
-      };
-      setSurtidores([...surtidores, newSurtidor]);
+    
+    try {
+      if (editingSurtidor) {
+        await surtidorService.update(editingSurtidor.id, {
+          ...formData,
+          empresaId: editingSurtidor.empresaId, // Mantener empresa original
+        });
+      } else {
+        await surtidorService.create({
+          ...formData,
+          empresaId: currentTenant?.id || 0,
+          empresa: currentTenant?.nombre,
+        });
+      }
+      await loadSurtidores();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving surtidor:", error);
     }
-    setOpenDialog(false);
   };
 
   const handleDeleteClick = (surtidor: SurtidorExtended): void => {
@@ -166,9 +177,14 @@ export default function Surtidores() {
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async () => {
     if (deleteSurtidor) {
-      setSurtidores(surtidores.filter((s) => s.id !== deleteSurtidor.id));
+      try {
+        await surtidorService.delete(deleteSurtidor.id);
+        await loadSurtidores();
+      } catch (error) {
+        console.error("Error deleting surtidor:", error);
+      }
     }
     setOpenDeleteDialog(false);
     setDeleteSurtidor(null);
@@ -186,9 +202,9 @@ export default function Surtidores() {
 
   return (
     <Box>
-       {/* ... (todo el JSX de Surtidores.tsx no cambia) ... */}
-       {/* Header */}
-       <Box sx={{ mb: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
         <Box
           sx={{
             display: "flex",
