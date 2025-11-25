@@ -22,6 +22,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",
+    "react-window": "^2.2.3",
     "recharts": "^3.3.0",
     "root": "github:tanstack/query",
     "vite-plugin-google-maps": "^0.0.1",

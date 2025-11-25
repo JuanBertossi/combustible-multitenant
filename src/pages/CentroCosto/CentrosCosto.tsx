@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -46,6 +47,15 @@ interface FormData {
 }
 
 export default function CentrosCosto() {
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const { user } = useAuth();
   const [items, setItems] = useState<CentroCosto[]>(mockCentrosCosto);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -193,7 +203,8 @@ export default function CentrosCosto() {
               Centros de Costo
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Gestión de lotes, obras, áreas o proyectos • {filteredItems.length}{" "}
+              Gestión de lotes, obras, áreas o proyectos •{" "}
+              {filteredItems.length}{" "}
               {filteredItems.length === 1 ? "ítem" : "ítems"}
             </Typography>
           </Box>
@@ -416,7 +427,10 @@ export default function CentrosCosto() {
               label="Código"
               value={formData.codigo}
               onChange={(e) =>
-                setFormData({ ...formData, codigo: e.target.value.toUpperCase() })
+                setFormData({
+                  ...formData,
+                  codigo: e.target.value.toUpperCase(),
+                })
               }
               error={!!errors.codigo}
               helperText={errors.codigo}
@@ -441,7 +455,10 @@ export default function CentrosCosto() {
               label="Tipo"
               value={formData.tipo}
               onChange={(e) =>
-                setFormData({ ...formData, tipo: e.target.value as TipoCentroCosto })
+                setFormData({
+                  ...formData,
+                  tipo: e.target.value as TipoCentroCosto,
+                })
               }
               error={!!errors.tipo}
               helperText={errors.tipo}
@@ -454,7 +471,7 @@ export default function CentrosCosto() {
               ))}
             </TextField>
 
-             <FormControlLabel
+            <FormControlLabel
               control={
                 <Switch
                   checked={formData.activo}
@@ -465,7 +482,6 @@ export default function CentrosCosto() {
               }
               label="Activo"
             />
-
           </Box>
         </DialogContent>
         <DialogActions>

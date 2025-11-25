@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -82,6 +83,15 @@ export default function Tanques() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
 
   const tanquesPorEmpresa = tanques.filter(
     (t) => t.empresaId === currentTenant?.id

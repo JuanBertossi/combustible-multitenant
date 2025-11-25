@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Grid,
@@ -54,10 +55,27 @@ type TipoReporte =
   | "desvios"
   | "ranking-eficiencia";
 
-const COLORS = ["#1E2C56", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = [
+  "#1E2C56",
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+];
 
 export default function Reportes() {
-  const [tipoReporte, setTipoReporte] = useState<TipoReporte>("consumo-vehiculos");
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
+  const [tipoReporte, setTipoReporte] =
+    useState<TipoReporte>("consumo-vehiculos");
 
   const handleExport = () => {
     let dataToExport: Record<string, string | number>[] = [];
@@ -69,8 +87,8 @@ export default function Reportes() {
           Vehículo: `${item.vehiculoPatente} - ${item.vehiculoTipo}`,
           "Total Litros": item.litrosTotales,
           "Total Costo": `$${item.costoTotal.toLocaleString()}`,
-          "Eventos": item.numeroEventos,
-          "Eficiencia": item.eficienciaKmPorLitro 
+          Eventos: item.numeroEventos,
+          Eficiencia: item.eficienciaKmPorLitro
             ? `${item.eficienciaKmPorLitro.toFixed(2)} km/L`
             : `${item.eficienciaLitrosPorHora?.toFixed(2)} L/h`,
         }));
@@ -81,7 +99,7 @@ export default function Reportes() {
           Surtidor: item.surtidorNombre,
           "Total Litros": item.litrosTotales,
           "Total Costo": `$${item.costoTotal.toLocaleString()}`,
-          "Eventos": item.numeroEventos,
+          Eventos: item.numeroEventos,
         }));
         filename = "Litros_por_Surtidor";
         break;
@@ -89,7 +107,7 @@ export default function Reportes() {
         dataToExport = mockLitrosPorOperador.map((item) => ({
           Operador: `${item.choferNombre} ${item.choferApellido}`,
           "Total Litros": item.litrosTotales,
-          "Eventos": item.numeroEventos,
+          Eventos: item.numeroEventos,
           "Vehículos Usados": item.vehiculosMasUsados.join(", "),
         }));
         filename = "Litros_por_Operador";
@@ -100,8 +118,8 @@ export default function Reportes() {
           Tipo: item.centroCostoTipo,
           "Total Litros": item.litrosTotales,
           "Total Costo": `$${item.costoTotal.toLocaleString()}`,
-          "Eventos": item.numeroEventos,
-          "Vehículos": item.vehiculosAsignados,
+          Eventos: item.numeroEventos,
+          Vehículos: item.vehiculosAsignados,
         }));
         filename = "Costos_por_Centro_de_Costo";
         break;
@@ -133,7 +151,10 @@ export default function Reportes() {
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Reporte");
-    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `${filename}_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
   };
 
   return (
@@ -232,7 +253,10 @@ export default function Reportes() {
           {/* Gráfico de Barras */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={8}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Total de Litros por Vehículo
@@ -250,7 +274,11 @@ export default function Reportes() {
                       }}
                       formatter={(value) => [`${value} L`, "Litros"]}
                     />
-                    <Bar dataKey="litrosTotales" fill="#1E2C56" radius={[8, 8, 0, 0]} />
+                    <Bar
+                      dataKey="litrosTotales"
+                      fill="#1E2C56"
+                      radius={[8, 8, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -263,7 +291,11 @@ export default function Reportes() {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Card
                 elevation={0}
-                sx={{ border: "1px solid #e0e0e0", borderRadius: 2, bgcolor: "#1E2C5608" }}
+                sx={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 2,
+                  bgcolor: "#1E2C5608",
+                }}
               >
                 <CardContent>
                   <Typography variant="caption" color="text.secondary">
@@ -279,7 +311,11 @@ export default function Reportes() {
               </Card>
               <Card
                 elevation={0}
-                sx={{ border: "1px solid #e0e0e0", borderRadius: 2, bgcolor: "#10b98108" }}
+                sx={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 2,
+                  bgcolor: "#10b98108",
+                }}
               >
                 <CardContent>
                   <Typography variant="caption" color="text.secondary">
@@ -293,13 +329,19 @@ export default function Reportes() {
                   </Typography>
                 </CardContent>
               </Card>
-              <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+              <Card
+                elevation={0}
+                sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+              >
                 <CardContent>
                   <Typography variant="caption" color="text.secondary">
                     Total Cargas
                   </Typography>
                   <Typography variant="h4" fontWeight={700}>
-                    {mockConsumoVehiculos.reduce((sum, item) => sum + item.numeroEventos, 0)}
+                    {mockConsumoVehiculos.reduce(
+                      (sum, item) => sum + item.numeroEventos,
+                      0
+                    )}
                   </Typography>
                 </CardContent>
               </Card>
@@ -309,7 +351,10 @@ export default function Reportes() {
           {/* Tabla */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 0 }}>
                 <TableContainer>
                   <Table>
@@ -337,17 +382,28 @@ export default function Reportes() {
                             <Typography variant="body2" fontWeight={600}>
                               {item.vehiculoPatente}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {item.vehiculoTipo}
                             </Typography>
                           </TableCell>
-                          <TableCell align="right">{item.litrosTotales.toLocaleString()} L</TableCell>
-                          <TableCell align="right">${item.costoTotal.toLocaleString()}</TableCell>
-                          <TableCell align="right">{item.numeroEventos}</TableCell>
                           <TableCell align="right">
-                            {item.eficienciaKmPorLitro 
+                            {item.litrosTotales.toLocaleString()} L
+                          </TableCell>
+                          <TableCell align="right">
+                            ${item.costoTotal.toLocaleString()}
+                          </TableCell>
+                          <TableCell align="right">
+                            {item.numeroEventos}
+                          </TableCell>
+                          <TableCell align="right">
+                            {item.eficienciaKmPorLitro
                               ? `${item.eficienciaKmPorLitro.toFixed(2)} km/L`
-                              : `${item.eficienciaLitrosPorHora?.toFixed(2)} L/h`}
+                              : `${item.eficienciaLitrosPorHora?.toFixed(
+                                  2
+                                )} L/h`}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -361,20 +417,32 @@ export default function Reportes() {
       )}
 
       {/* Reporte 2: Litros por Surtidor */}
-      {tipoReporte === "litros-surtidor"  && (
+      {tipoReporte === "litros-surtidor" && (
         <Grid container spacing={3}>
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={7}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Distribución de Litros por Surtidor
                 </Typography>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={mockLitrosPorSurtidor} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" horizontal={false} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#e0e0e0"
+                      horizontal={false}
+                    />
                     <XAxis type="number" stroke="#64748b" />
-                    <YAxis dataKey="surtidorNombre" type="category" stroke="#64748b" width={150} />
+                    <YAxis
+                      dataKey="surtidorNombre"
+                      type="category"
+                      stroke="#64748b"
+                      width={150}
+                    />
                     <Tooltip
                       contentStyle={{
                         borderRadius: 8,
@@ -382,7 +450,11 @@ export default function Reportes() {
                       }}
                       formatter={(value) => [`${value} L`, "Litros"]}
                     />
-                    <Bar dataKey="litrosTotales" fill="#3b82f6" radius={[0, 8, 8, 0]} />
+                    <Bar
+                      dataKey="litrosTotales"
+                      fill="#3b82f6"
+                      radius={[0, 8, 8, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -391,7 +463,10 @@ export default function Reportes() {
 
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={5}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Proporción de Uso
@@ -408,7 +483,10 @@ export default function Reportes() {
                       label
                     >
                       {mockLitrosPorSurtidor.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => `${value} L`} />
@@ -425,7 +503,10 @@ export default function Reportes() {
         <Grid container spacing={3}>
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Consumo por Operador
@@ -442,8 +523,18 @@ export default function Reportes() {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="litrosTotales" name="Total Litros" fill="#10b981" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="numeroEventos" name="Cantidad Eventos" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                    <Bar
+                      dataKey="litrosTotales"
+                      name="Total Litros"
+                      fill="#10b981"
+                      radius={[8, 8, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="numeroEventos"
+                      name="Cantidad Eventos"
+                      fill="#f59e0b"
+                      radius={[8, 8, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -457,7 +548,10 @@ export default function Reportes() {
         <Grid container spacing={3}>
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={8}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Costos por Centro de Costo
@@ -472,9 +566,16 @@ export default function Reportes() {
                         borderRadius: 8,
                         border: "1px solid #e0e0e0",
                       }}
-                      formatter={(value) => [`$${value.toLocaleString()}`, "Costo"]}
+                      formatter={(value) => [
+                        `$${value.toLocaleString()}`,
+                        "Costo",
+                      ]}
                     />
-                    <Bar dataKey="costoTotal" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                    <Bar
+                      dataKey="costoTotal"
+                      fill="#8b5cf6"
+                      radius={[8, 8, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -485,9 +586,19 @@ export default function Reportes() {
           <Grid item xs={12} md={4}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {mockCostoPorCentroCosto.map((cc) => (
-                <Card key={cc.centroCostoId} elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+                <Card
+                  key={cc.centroCostoId}
+                  elevation={0}
+                  sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+                >
                   <CardContent>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="body2" fontWeight={600}>
                         {cc.centroCostoCodigo}
                       </Typography>
@@ -500,14 +611,19 @@ export default function Reportes() {
                         }}
                       />
                     </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mb: 1 }}
+                    >
                       {cc.centroCostoNombre}
                     </Typography>
                     <Typography variant="h6" fontWeight={700} color="#8b5cf6">
                       ${cc.costoTotal.toLocaleString()}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {cc.litrosTotales.toLocaleString()} L • {cc.numeroEventos} cargas
+                      {cc.litrosTotales.toLocaleString()} L • {cc.numeroEventos}{" "}
+                      cargas
                     </Typography>
                   </CardContent>
                 </Card>
@@ -522,7 +638,10 @@ export default function Reportes() {
         <Grid container spacing={3}>
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 0 }}>
                 <Box sx={{ p: 4, borderBottom: "1px solid #e0e0e0" }}>
                   <Typography variant="h6" fontWeight={700}>
@@ -555,7 +674,9 @@ export default function Reportes() {
                       {mockDesvios.map((item) => (
                         <TableRow key={item.eventoId} hover>
                           <TableCell>#{item.eventoId}</TableCell>
-                          <TableCell>{new Date(item.fecha).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {new Date(item.fecha).toLocaleDateString()}
+                          </TableCell>
                           <TableCell>{item.vehiculoPatente}</TableCell>
                           <TableCell>{item.choferNombre}</TableCell>
                           <TableCell align="right">{item.litros} L</TableCell>
@@ -564,8 +685,14 @@ export default function Reportes() {
                               label={item.tipoDesvio}
                               size="small"
                               sx={{
-                                bgcolor: item.tipoDesvio === "exceso" ? "#ef444415" : "#3b82f615",
-                                color: item.tipoDesvio === "exceso" ? "#ef4444" : "#3b82f6",
+                                bgcolor:
+                                  item.tipoDesvio === "exceso"
+                                    ? "#ef444415"
+                                    : "#3b82f615",
+                                color:
+                                  item.tipoDesvio === "exceso"
+                                    ? "#ef4444"
+                                    : "#3b82f6",
                                 fontWeight: 600,
                               }}
                             />
@@ -575,9 +702,11 @@ export default function Reportes() {
                               label={item.severidad}
                               size="small"
                               color={
-                                item.severidad === "alta" ? "error" 
-                                : item.severidad === "media" ? "warning" 
-                                : "success"
+                                item.severidad === "alta"
+                                  ? "error"
+                                  : item.severidad === "media"
+                                  ? "warning"
+                                  : "success"
                               }
                               sx={{ fontWeight: 600 }}
                             />
@@ -598,7 +727,10 @@ export default function Reportes() {
         <Grid container spacing={3}>
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={7}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Eficiencia de Combustible
@@ -615,7 +747,11 @@ export default function Reportes() {
                       }}
                       formatter={(value) => [`${value}`, "Eficiencia"]}
                     />
-                    <Bar dataKey="eficiencia" fill="#10b981" radius={[8, 8, 0, 0]} />
+                    <Bar
+                      dataKey="eficiencia"
+                      fill="#10b981"
+                      radius={[8, 8, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -624,7 +760,10 @@ export default function Reportes() {
 
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
           <Grid item xs={12} md={5}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
+            <Card
+              elevation={0}
+              sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}
+            >
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
                   Podio de Eficiencia
@@ -635,13 +774,19 @@ export default function Reportes() {
                       key={item.vehiculoId}
                       elevation={0}
                       sx={{
-                        border: item.posicion === 1 ? "2px solid #10b981" : "1px solid #e0e0e0",
+                        border:
+                          item.posicion === 1
+                            ? "2px solid #10b981"
+                            : "1px solid #e0e0e0",
                         borderRadius: 2,
-                        bgcolor: item.posicion === 1 ? "#10b98108" : "transparent",
+                        bgcolor:
+                          item.posicion === 1 ? "#10b98108" : "transparent",
                       }}
                     >
                       <CardContent>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
                           <Box
                             sx={{
                               width: 48,
@@ -665,12 +810,19 @@ export default function Reportes() {
                             <Typography variant="body2" fontWeight={700}>
                               #{item.posicion} • {item.vehiculoPatente}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {item.vehiculoTipo}
                             </Typography>
                           </Box>
                           <Box sx={{ textAlign: "right" }}>
-                            <Typography variant="h6" fontWeight={700} color="#10b981">
+                            <Typography
+                              variant="h6"
+                              fontWeight={700}
+                              color="#10b981"
+                            >
                               {item.eficiencia.toFixed(1)}
                             </Typography>
                             <Chip
@@ -679,14 +831,18 @@ export default function Reportes() {
                               sx={{
                                 fontSize: "0.65rem",
                                 height: 18,
-                                bgcolor: 
-                                  item.tendencia === "mejorando" ? "#10b98115" 
-                                  : item.tendencia === "empeorando" ? "#ef444415"
-                                  : "#64748b15",
+                                bgcolor:
+                                  item.tendencia === "mejorando"
+                                    ? "#10b98115"
+                                    : item.tendencia === "empeorando"
+                                    ? "#ef444415"
+                                    : "#64748b15",
                                 color:
-                                  item.tendencia === "mejorando" ? "#10b981"
-                                  : item.tendencia === "empeorando" ? "#ef4444"
-                                  : "#64748b",
+                                  item.tendencia === "mejorando"
+                                    ? "#10b981"
+                                    : item.tendencia === "empeorando"
+                                    ? "#ef4444"
+                                    : "#64748b",
                               }}
                             />
                           </Box>

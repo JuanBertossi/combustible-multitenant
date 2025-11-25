@@ -4,11 +4,7 @@
 
 Este documento detalla las optimizaciones aplicadas al proyecto después de completar la migración a TypeScript.
 
----
-
 ## 1. ✅ Code-Splitting (División de Código)
-
-### Antes
 
 - Bundle único: **1,254 KB** (381 KB gzipped)
 - Todo el código se descargaba al cargar la aplicación
@@ -35,12 +31,7 @@ Este documento detalla las optimizaciones aplicadas al proyecto después de comp
 | Empresas           | 5.29 KB   | 2.12 KB   | Carga diferida        |
 | Usuarios           | 8.40 KB   | 3.03 KB   | Carga diferida        |
 | Vehiculos          | 7.81 KB   | 2.81 KB   | Carga diferida        |
-| Choferes           | 7.62 KB   | 2.86 KB   | Carga diferida        |
-| Eventos            | 8.87 KB   | 2.49 KB   | Carga diferida        |
-| Validacion         | 4.97 KB   | 1.85 KB   | Carga diferida        |
-| Surtidores         | 7.82 KB   | 2.76 KB   | Carga diferida        |
 | Tanques            | 10.56 KB  | 3.36 KB   | Carga diferida        |
-| Configuracion      | 2.78 KB   | 1.10 KB   | Carga diferida        |
 
 ### Beneficios:
 
@@ -72,11 +63,7 @@ const LoadingFallback = () => (
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      minHeight: "100vh",
-    }}
-  >
     Cargando...
-  </div>
 );
 ```
 
@@ -107,19 +94,11 @@ export interface FormHandlers {
 #### Después:
 
 ```typescript
-export interface TableColumn<T> {
-  format?: (value: T[keyof T], row: T) => React.ReactNode;
-}
-
-export interface FormHandlers {
-  handleInputChange: (field: string, value: string | number | boolean) => void;
-}
+export interface FormHandlers {}
 ```
 
 ### Beneficios:
 
-- ✅ Mejor autocompletado en IDEs
-- ✅ Detección de errores en tiempo de desarrollo
 - ✅ Código más mantenible
 - ✅ Eliminación completa de tipos `any` y `unknown` innecesarios
 
@@ -132,20 +111,12 @@ export interface FormHandlers {
 - MUI v7 tiene problemas conocidos con tipos de Grid
 - Suppressions temporales: `/* @ts-expect-error - MUI v7 Grid type incompatibility */`
 
-### Cuando se actualice MUI:
-
 1. Buscar todos los `@ts-expect-error` en el proyecto
 2. Remover los relacionados con Grid
-3. Verificar con `npx tsc --noEmit`
-
----
 
 ## 📊 Métricas de Rendimiento
 
-### Tiempo de Build
-
 - **Antes**: ~11.12s
-- **Después**: ~8.93s
 - **Mejora**: 20% más rápido
 
 ### Tamaño del Bundle Principal
@@ -171,43 +142,19 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      output: {
         manualChunks: {
           "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "mui-core": ["@mui/material", "@emotion/react", "@emotion/styled"],
-          "mui-icons": ["@mui/icons-material"],
-          charts: ["recharts"],
-          utils: ["date-fns", "axios", "xlsx"],
-        },
-      },
-    },
     chunkSizeWarningLimit: 600,
-  },
 });
 ```
 
 ---
 
-## ✅ Checklist de Optimización
-
-- [x] Code-splitting implementado
 - [x] Lazy loading de todas las páginas
 - [x] Tipos específicos en lugar de `unknown`
-- [x] Eliminación de tipos `any`
-- [x] Build de producción optimizado
-- [x] Sin errores de TypeScript
 - [x] Documentación actualizada
 
----
-
-## 🚀 Próximos Pasos Recomendados
-
-### Performance
-
 - [ ] Implementar Service Worker para PWA
-- [ ] Optimizar imágenes (LoginFondo.png es 993 KB)
-- [ ] Implementar caché de API con React Query
-- [ ] Agregar pre-fetching de rutas probables
 
 ### UX
 

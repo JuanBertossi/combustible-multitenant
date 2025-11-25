@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -47,8 +48,11 @@ export default function Surtidores() {
   const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingSurtidor, setEditingSurtidor] = useState<SurtidorExtended | null>(null);
-  const [deleteSurtidor, setDeleteSurtidor] = useState<SurtidorExtended | null>(null);
+  const [editingSurtidor, setEditingSurtidor] =
+    useState<SurtidorExtended | null>(null);
+  const [deleteSurtidor, setDeleteSurtidor] = useState<SurtidorExtended | null>(
+    null
+  );
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterTipo, setFilterTipo] = useState<string>("Todos");
   const [formData, setFormData] = useState<SurtidorFormData>({
@@ -75,6 +79,15 @@ export default function Surtidores() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
 
   const surtidoresPorEmpresa = surtidores.filter(
     (s) => s.empresaId === currentTenant?.id
@@ -151,7 +164,7 @@ export default function Surtidores() {
 
   const handleSave = async () => {
     if (!validate()) return;
-    
+
     try {
       if (editingSurtidor) {
         await surtidorService.update(editingSurtidor.id, {

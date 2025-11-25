@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Typography,
@@ -27,6 +28,7 @@ import { mockEventos } from "../../utils/mockData";
 import { getEvidenciasByEvento } from "../../utils/mockEvidencias";
 import { useAuth } from "../../hooks/useAuth";
 import { format } from "date-fns";
+import format from "date-fns/format";
 import { ESTADOS_EVENTO } from "../../utils/constants";
 import type { Evento } from "../../types";
 import {
@@ -49,6 +51,15 @@ interface EventoExtended extends Evento {
 }
 
 export default function ValidacionEventos() {
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const { user } = useAuth();
   const [eventos, setEventos] = useState<EventoExtended[]>(
     mockEventos as EventoExtended[]
@@ -74,8 +85,10 @@ export default function ValidacionEventos() {
       const evidencias = getEvidenciasByEvento(evento.id);
       // En un caso real, buscaríamos la política de la empresa del evento
       // y el umbral del vehículo específico
-      const umbral = mockUmbrales.find((u) => u.vehiculoId === evento.vehiculoId);
-      
+      const umbral = mockUmbrales.find(
+        (u) => u.vehiculoId === evento.vehiculoId
+      );
+
       const result = validarEventoConPoliticas(
         evento,
         evidencias,
@@ -187,7 +200,8 @@ export default function ValidacionEventos() {
             de validación
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Haz click en "Ver Evidencias" para revisar fotos, audio y GPS antes de validar
+            Haz click en "Ver Evidencias" para revisar fotos, audio y GPS antes
+            de validar
           </Typography>
         </Alert>
       )}
@@ -196,9 +210,13 @@ export default function ValidacionEventos() {
       <Grid container spacing={3}>
         {eventosPendientes.map((evento) => {
           const validationResult = validationResults.get(evento.id);
-          const hasErrors = validationResult?.errores.length ? validationResult.errores.length > 0 : false;
-          const hasWarnings = validationResult?.advertencias.length ? validationResult.advertencias.length > 0 : false;
-          
+          const hasErrors = validationResult?.errores.length
+            ? validationResult.errores.length > 0
+            : false;
+          const hasWarnings = validationResult?.advertencias.length
+            ? validationResult.advertencias.length > 0
+            : false;
+
           return (
             /* @ts-expect-error - MUI v7 Grid type incompatibility */
             <Grid item xs={12} md={6} lg={4} key={evento.id}>
@@ -206,10 +224,18 @@ export default function ValidacionEventos() {
                 elevation={0}
                 sx={{
                   border: "2px solid",
-                  borderColor: hasErrors ? "#ef4444" : hasWarnings ? "#f59e0b" : "#e0e0e0",
+                  borderColor: hasErrors
+                    ? "#ef4444"
+                    : hasWarnings
+                    ? "#f59e0b"
+                    : "#e0e0e0",
                   borderRadius: 2,
                   transition: "all 0.3s",
-                  bgcolor: hasErrors ? "#ef444405" : hasWarnings ? "#f59e0b05" : "white",
+                  bgcolor: hasErrors
+                    ? "#ef444405"
+                    : hasWarnings
+                    ? "#f59e0b05"
+                    : "white",
                   "&:hover": {
                     boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                     transform: "translateY(-4px)",
@@ -226,7 +252,9 @@ export default function ValidacionEventos() {
                       mb: 2,
                     }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                    >
                       <Box
                         sx={{
                           width: 40,
@@ -250,7 +278,7 @@ export default function ValidacionEventos() {
                         </Typography>
                       </Box>
                     </Box>
-                    
+
                     {/* Validation Status Chip */}
                     {validationResult && !validationResult.valido ? (
                       <Tooltip title={getResumenValidacion(validationResult)}>
@@ -298,8 +326,13 @@ export default function ValidacionEventos() {
 
                   {/* Info básica */}
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      <strong>Chofer:</strong> {evento.chofer || evento.choferNombre}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      <strong>Chofer:</strong>{" "}
+                      {evento.chofer || evento.choferNombre}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       <strong>Fecha:</strong>{" "}
@@ -323,7 +356,11 @@ export default function ValidacionEventos() {
                         <Typography variant="caption" color="text.secondary">
                           Litros
                         </Typography>
-                        <Typography variant="h6" fontWeight={700} color="#1E2C56">
+                        <Typography
+                          variant="h6"
+                          fontWeight={700}
+                          color="#1E2C56"
+                        >
                           {evento.litros} L
                         </Typography>
                       </Grid>
@@ -332,8 +369,13 @@ export default function ValidacionEventos() {
                         <Typography variant="caption" color="text.secondary">
                           Costo
                         </Typography>
-                        <Typography variant="h6" fontWeight={700} color="#10b981">
-                          ${(evento.costo || evento.total || 0).toLocaleString()}
+                        <Typography
+                          variant="h6"
+                          fontWeight={700}
+                          color="#10b981"
+                        >
+                          $
+                          {(evento.costo || evento.total || 0).toLocaleString()}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -350,8 +392,13 @@ export default function ValidacionEventos() {
                         border: "1px solid #3b82f630",
                       }}
                     >
-                      <Typography variant="caption" fontWeight={600} color="#3b82f6">
-                        📎 {getEvidenciasByEvento(evento.id).length} evidencias disponibles
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        color="#3b82f6"
+                      >
+                        📎 {getEvidenciasByEvento(evento.id).length} evidencias
+                        disponibles
                       </Typography>
                     </Box>
                   )}
@@ -456,8 +503,8 @@ export default function ValidacionEventos() {
         </DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }} color="text.secondary">
-            Ingresa el motivo del rechazo. Este comentario será visible para el chofer y
-            supervisores.
+            Ingresa el motivo del rechazo. Este comentario será visible para el
+            chofer y supervisores.
           </Typography>
           <TextField
             fullWidth

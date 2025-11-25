@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Grid,
@@ -131,6 +132,19 @@ export default function Dashboard() {
       bgColor: "#f59e0b15",
     },
   ];
+
+  // Simulación de loading visual para optimización UX
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Puedes activar el loading con setIsLoading(true) en fetchs reales
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -422,7 +436,7 @@ export default function Dashboard() {
                     cx="50%"
                     cy="45%"
                     labelLine={false}
-                    label={({ porcentaje }) => `${porcentaje}%`}
+                    label={(entry) => `${entry["porcentaje"]}%`}
                     outerRadius={95}
                     innerRadius={55}
                     fill="#8884d8"

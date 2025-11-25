@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -30,6 +31,7 @@ export default function Empresas() {
   const [empresas, setEmpresas] = useState<Empresa[]>(
     mockEmpresas as Empresa[]
   );
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
@@ -49,6 +51,15 @@ export default function Empresas() {
       (e.cuit && e.cuit.includes(searchTerm))
     );
   });
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
 
   const handleNew = (): void => {
     setEditingEmpresa(null);

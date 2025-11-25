@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -63,6 +64,15 @@ export default function Vehiculos() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null);
@@ -166,7 +176,7 @@ export default function Vehiculos() {
 
   const handleSave = async () => {
     if (!validate()) return;
-    
+
     try {
       if (editingVehiculo) {
         await vehiculoService.update(editingVehiculo.id, {

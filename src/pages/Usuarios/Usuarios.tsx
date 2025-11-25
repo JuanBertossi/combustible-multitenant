@@ -1,3 +1,8 @@
+function getInitials(nombre: string, apellido: string): string {
+  const n = nombre.trim().charAt(0);
+  const a = apellido.trim().charAt(0);
+  return (n + a).toUpperCase();
+}
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -18,6 +23,7 @@ import {
   IconButton,
 } from "@mui/material";
 import LinearProgress from "@mui/material/LinearProgress";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
@@ -54,6 +60,14 @@ const roles: UserRole[] = [
 ];
 
 export default function Usuarios() {
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const { user } = useAuth();
   const { currentTenant } = useTenant();
   const [usuarios, setUsuarios] = useState<UsuarioExtended[]>([]);
@@ -219,6 +233,8 @@ export default function Usuarios() {
     setOpenDeleteDialog(false);
     setDeleteUsuario(null);
   };
+
+  function getAvatarColor(nombre: string): string {
     const colors = [
       "#3b82f6",
       "#10b981",
@@ -229,7 +245,7 @@ export default function Usuarios() {
     ];
     const index = nombre.charCodeAt(0) % colors.length;
     return colors[index] ?? "#999";
-  };
+  }
 
   const getRolColor = (rol: UserRole): { bg: string; color: string } => {
     const colors: Record<UserRole, { bg: string; color: string }> = {

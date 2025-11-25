@@ -27,7 +27,8 @@ import {
 import type { Evento } from "../../types";
 import type { Evidencia } from "../../types/reports";
 import { format } from "date-fns";
-import { Map } from '@google-maps/map';
+import format from "date-fns/format";
+import { Map } from "@google-maps/map";
 
 interface EventoDetalleProps {
   open: boolean;
@@ -152,7 +153,9 @@ export default function EventoDetalle({
                       mb: 1,
                     }}
                   >
-                    <DirectionsCarIcon sx={{ fontSize: 20, color: "#1E2C56" }} />
+                    <DirectionsCarIcon
+                      sx={{ fontSize: 20, color: "#1E2C56" }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       Vehículo
                     </Typography>
@@ -202,7 +205,9 @@ export default function EventoDetalle({
                       mb: 1,
                     }}
                   >
-                    <LocalGasStationIcon sx={{ fontSize: 20, color: "#1E2C56" }} />
+                    <LocalGasStationIcon
+                      sx={{ fontSize: 20, color: "#1E2C56" }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       Litros
                     </Typography>
@@ -269,7 +274,9 @@ export default function EventoDetalle({
                       mb: 0.5,
                     }}
                   >
-                    <CalendarTodayIcon sx={{ fontSize: 18, color: "#1E2C56" }} />
+                    <CalendarTodayIcon
+                      sx={{ fontSize: 18, color: "#1E2C56" }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       Fecha y Hora
                     </Typography>
@@ -324,7 +331,11 @@ export default function EventoDetalle({
               {/* Evidencias Fotográficas */}
               {fotos.length > 0 && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    sx={{ mb: 2 }}
+                  >
                     Evidencias Fotográficas ({fotos.length})
                   </Typography>
                   <ImageGallery images={fotos} onDownload={handleDownload} />
@@ -334,7 +345,11 @@ export default function EventoDetalle({
               {/* Nota de Voz */}
               {audio && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    sx={{ mb: 2 }}
+                  >
                     Nota de Voz
                   </Typography>
                   <AudioPlayer audio={audio} onDownload={handleDownload} />

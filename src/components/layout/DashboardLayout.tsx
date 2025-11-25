@@ -1,13 +1,18 @@
 import { Box } from "@mui/material";
+import { useState } from "react";
+import ProgressBar from "../common/ProgressBar/ProgressBar";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
 export default function DashboardLayout() {
+  // Estado de ejemplo para mostrar la barra de progreso
+  const [progressVisible, setProgressVisible] = useState(false);
+
+  // Puedes disparar setProgressVisible(true) en operaciones largas (fetch, export, etc.)
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
-
       <Box
         component="main"
         sx={{
@@ -32,8 +37,8 @@ export default function DashboardLayout() {
           },
         }}
       >
+        <ProgressBar visible={progressVisible} />
         <Header />
-
         <Box
           sx={{
             flexGrow: 1,
@@ -41,15 +46,15 @@ export default function DashboardLayout() {
             minWidth: 0,
             position: "relative",
             zIndex: 1,
-            display: 'flex',
-            justifyContent: 'center',
+            display: "flex",
+            justifyContent: "center",
           }}
         >
           <Box
             sx={{
-              width: '100%',
-              maxWidth: '1600px', 
-              px: 3, 
+              width: "100%",
+              maxWidth: "1600px",
+              px: 3,
               py: 3,
             }}
           >

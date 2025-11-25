@@ -1,4 +1,5 @@
 import { Box, Container, Typography, Divider, Grid } from "@mui/material";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
   ImageGallery,
   AudioPlayer,
@@ -73,6 +74,15 @@ const mockLocation: Evidencia = {
 };
 
 export default function EvidenceDemo() {
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const handleUpload = async (files: File[], tipo: string) => {
     console.log("Uploading files:", files, "Tipo:", tipo);
     // Simular upload

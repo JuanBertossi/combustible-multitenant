@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import ErrorBoundary from "./components/common/ErrorBoundary/ErrorBoundary";
+import SkeletonLoading from "./components/common/SkeletonLoading/SkeletonLoading";
 import { AuthProvider } from "./context/AuthProvider";
 import { useAuth } from "./hooks/useAuth";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -25,18 +27,7 @@ const Reportes = lazy(() => import("./pages/reportes/Reportes"));
 /**
  * Componente de carga mientras se cargan las páginas lazy
  */
-const LoadingFallback = () => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-    }}
-  >
-    Cargando...
-  </div>
-);
+const LoadingFallback = () => <SkeletonLoading height={48} count={6} />;
 /**
  * Componente de ruta protegida
  * Solo permite acceso si el usuario está autenticado
@@ -45,18 +36,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-        }}
-      >
-        Cargando...
-      </div>
-    );
+    return <SkeletonLoading height={48} count={6} />;
   }
 
   if (!user) {
@@ -212,11 +192,13 @@ function AppRoutes() {
  */
 function App() {
   return (
-    <AuthProvider>
-      <TenantProvider>
-        <AppRoutes />
-      </TenantProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <TenantProvider>
+          <AppRoutes />
+        </TenantProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -11,14 +11,12 @@ import {
   MenuItem,
   Typography,
   InputAdornment,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
   LinearProgress,
   Alert,
 } from "@mui/material";
+import VirtualizedTable, {
+  DataTableColumn,
+} from "../../components/common/DataTable/VirtualizedTable";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,11 +27,24 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTenant } from "../../hooks/useTenant";
 import { eventoService } from "../../services/EventoService";
 import type { EventoExtended, FormErrors } from "../../types";
+import {
+  mockVehiculos,
+  mockChoferes,
+  mockSurtidores,
+} from "../../utils/mockData";
 
 interface EventoFormData {
-  nombre: string;
-  descripcion: string;
-  fecha: string; // ISO date string
+  vehiculoId: number | "";
+  choferId: number | "";
+  surtidorId: number | "";
+  litros: number | "";
+  precio: number | "";
+  total: number | "";
+  fecha: string;
+  estado: "Pendiente" | "Validado" | "Rechazado";
+  observaciones: string;
+  evidencias?: File[];
+  ubicacion?: string;
   activo: boolean;
 }
 
@@ -44,13 +55,23 @@ export default function Eventos() {
   const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(null);
+  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(
+    null
+  );
   const [deleteEvento, setDeleteEvento] = useState<EventoExtended | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [formData, setFormData] = useState<EventoFormData>({
-    nombre: "",
-    descripcion: "",
+    vehiculoId: "",
+    choferId: "",
+    surtidorId: "",
+    litros: "",
+    precio: "",
+    total: "",
     fecha: "",
+    estado: "Pendiente",
+    observaciones: "",
+    evidencias: [],
+    ubicacion: "",
     activo: true,
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -70,20 +91,82 @@ export default function Eventos() {
     (e) => e.empresaId === currentTenant?.id
   );
 
-  const filteredEventos = eventosPorEmpresa.filter((e) =>
-    e.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Limpieza de variables y props inexistentes en filtro
+  const filteredEventos = eventosPorEmpresa.filter((e) => {
+    const vehiculoPatente = e.vehiculoPatente
+      ? e.vehiculoPatente.toLowerCase()
+      : "";
+    const choferNombre = e.choferNombre ? e.choferNombre.toLowerCase() : "";
+    const observaciones = e.observaciones ? e.observaciones.toLowerCase() : "";
+    const term = searchTerm.toLowerCase();
+    return (
+      vehiculoPatente.includes(term) ||
+      choferNombre.includes(term) ||
+      observaciones.includes(term)
+    );
+  });
+
+  // Columnas para la tabla virtualizada
+  const columns: DataTableColumn<EventoExtended>[] = [
+    { field: "vehiculoPatente", headerName: "Vehículo" },
+    { field: "choferNombre", headerName: "Chofer" },
+    { field: "surtidorNombre", headerName: "Surtidor" },
+    { field: "litros", headerName: "Litros" },
+    { field: "precio", headerName: "Precio" },
+    { field: "total", headerName: "Total" },
+    {
+      field: "estado",
+      headerName: "Estado",
+      type: "badge",
+      getColor: (value) =>
+        value === "Validado"
+          ? "success"
+          : value === "Pendiente"
+          ? "info"
+          : "error",
+    },
+    { field: "observaciones", headerName: "Observaciones" },
+    { field: "ubicacion", headerName: "Ubicación" },
+    ...(user?.rol === "SuperAdmin"
+      ? [
+          {
+            field: "empresaNombre",
+            headerName: "Empresa",
+          } as DataTableColumn<EventoExtended>,
+        ]
+      : []),
+  ];
+
+  const handleNew = () => {
+    setEditingEvento(null);
+    setOpenDialog(true);
+  };
+
+  const handleEdit = (evento: EventoExtended) => {
+    setEditingEvento(evento);
+    setOpenDialog(true);
+  };
+
+  const handleDeleteClick = (evento: EventoExtended) => {
+    setDeleteEvento(evento);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleSave = () => {
+    // Simulate save logic
+    setOpenDialog(false);
+    setEditingEvento(null);
+  };
+
+  const handleDelete = () => {
+    // Simulate delete logic
+    setOpenDeleteDialog(false);
+    setDeleteEvento(null);
+  };
 
   const handleExport = (): void => {
-    const dataToExport = filteredEventos.map((e) => ({
-      Nombre: e.nombre,
-      Descripción: e.descripcion ?? "",
-      Fecha: e.fecha,
-      Estado: e.activo ? "Activo" : "Inactivo",
-      ...(user?.rol === "SuperAdmin" && { Empresa: e.empresaNombre }),
-    }));
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    // Create worksheet from filteredEventos
+    const ws = XLSX.utils.json_to_sheet(filteredEventos);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Eventos");
     XLSX.writeFile(
@@ -91,79 +174,6 @@ export default function Eventos() {
       `Eventos_${new Date().toISOString().split("T")[0]}.xlsx`
     );
   };
-
-  const handleNew = (): void => {
-    setEditingEvento(null);
-    setFormData({ nombre: "", descripcion: "", fecha: "", activo: true });
-    setErrors({});
-    setOpenDialog(true);
-  };
-
-  const handleEdit = (evento: EventoExtended): void => {
-    setEditingEvento(evento);
-    setFormData({
-      nombre: evento.nombre,
-      descripcion: evento.descripcion ?? "",
-      fecha: evento.fecha?.split("T")[0] ?? "",
-      activo: evento.activo,
-    });
-    setErrors({});
-    setOpenDialog(true);
-  };
-
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
-    if (!formData.fecha) newErrors.fecha = "La fecha es obligatoria";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSave = async (): Promise<void> => {
-    if (!validate()) return;
-    if (editingEvento) {
-      const updated = await eventoService.update(editingEvento.id, {
-        nombre: formData.nombre,
-        descripcion: formData.descripcion,
-        fecha: formData.fecha,
-        activo: formData.activo,
-      });
-      setEventos(eventos.map((e) => (e.id === updated.id ? updated : e)));
-    } else {
-      const created = await eventoService.create({
-        nombre: formData.nombre,
-        descripcion: formData.descripcion,
-        fecha: formData.fecha,
-        activo: formData.activo,
-        empresaId: currentTenant?.id || 0,
-        empresaNombre: currentTenant?.nombre,
-      } as any);
-      setEventos([...eventos, created]);
-    }
-    setOpenDialog(false);
-  };
-
-  const handleDeleteClick = (evento: EventoExtended): void => {
-    setDeleteEvento(evento);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleDelete = async (): Promise<void> => {
-    if (deleteEvento) {
-      await eventoService.delete(deleteEvento.id);
-      setEventos(eventos.filter((e) => e.id !== deleteEvento.id));
-    }
-    setOpenDeleteDialog(false);
-    setDeleteEvento(null);
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <LinearProgress sx={{ width: "50%" }} />
-      </Box>
-    );
-  }
 
   return (
     <Box>
@@ -243,108 +253,187 @@ export default function Eventos() {
         </Box>
       </Box>
 
-      {/* Grid de eventos */}
-      <Grid container spacing={3}>
-        {filteredEventos.map((evento) => (
-          <Grid item xs={12} sm={6} md={4} key={evento.id}>
-            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2, height: "100%", transition: "all 0.3s", "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.08)", transform: "translateY(-2px)" } }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="h6" fontWeight="700" sx={{ mb: 0.5 }}>
-                  {evento.nombre}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {evento.descripcion}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Fecha: {evento.fecha?.split("T")[0]}
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Chip
-                    label={evento.activo ? "Activo" : "Inactivo"}
-                    size="small"
-                    sx={{
-                      bgcolor: evento.activo ? "#10b98115" : "#99999915",
-                      color: evento.activo ? "#10b981" : "#999",
-                      fontWeight: 600,
-                      height: 20,
-                      fontSize: 11,
-                    }}
-                  />
-                </Box>
-                {user?.rol === "SuperAdmin" && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-                    Empresa: {evento.empresaNombre}
-                  </Typography>
-                )}
-                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEdit(evento)}
-                    sx={{ bgcolor: "#f3f4f6", "&:hover": { bgcolor: "#e5e7eb" } }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDeleteClick(evento)}
-                    sx={{ bgcolor: "#fee2e2", color: "#dc2626", "&:hover": { bgcolor: "#fecaca" } }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {filteredEventos.length === 0 && (
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
-            No hay eventos registrados
-          </Typography>
-        </Box>
-      )}
+      {/* Tabla paginada de eventos */}
+      <VirtualizedTable
+        columns={columns}
+        data={filteredEventos}
+        onEdit={handleEdit}
+        onDelete={handleDeleteClick}
+        emptyMessage="No hay eventos registrados"
+      />
 
       {/* Dialogs */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingEvento ? "Editar Evento" : "Nuevo Evento"}</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingEvento ? "Editar Evento" : "Nuevo Evento"}
+        </DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
             <TextField
-              label="Nombre"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              error={!!errors.nombre}
-              helperText={errors.nombre}
+              select
+              label="Vehículo"
+              value={formData.vehiculoId}
+              onChange={(e) =>
+                setFormData({ ...formData, vehiculoId: Number(e.target.value) })
+              }
+              error={!!errors.vehiculoId}
+              helperText={errors.vehiculoId}
+              required
+              fullWidth
+            >
+              <MenuItem value="">Seleccione...</MenuItem>
+              {mockVehiculos.map((v) => (
+                <MenuItem key={v.id} value={v.id}>
+                  {v.patente} - {v.marca} {v.modelo}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              label="Chofer"
+              value={formData.choferId}
+              onChange={(e) =>
+                setFormData({ ...formData, choferId: Number(e.target.value) })
+              }
+              error={!!errors.choferId}
+              helperText={errors.choferId}
+              required
+              fullWidth
+            >
+              <MenuItem value="">Seleccione...</MenuItem>
+              {mockChoferes.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.nombre} {c.apellido}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              label="Surtidor"
+              value={formData.surtidorId}
+              onChange={(e) =>
+                setFormData({ ...formData, surtidorId: Number(e.target.value) })
+              }
+              error={!!errors.surtidorId}
+              helperText={errors.surtidorId}
+              required
+              fullWidth
+            >
+              <MenuItem value="">Seleccione...</MenuItem>
+              {mockSurtidores.map((s) => (
+                <MenuItem key={s.id} value={s.id}>
+                  {s.nombre} ({s.ubicacion})
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Litros"
+              type="number"
+              value={formData.litros}
+              onChange={(e) =>
+                setFormData({ ...formData, litros: Number(e.target.value) })
+              }
+              error={!!errors.litros}
+              helperText={errors.litros}
               required
               fullWidth
             />
             <TextField
-              label="Descripción"
-              value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              multiline
-              rows={3}
+              label="Precio Unitario"
+              type="number"
+              value={formData.precio}
+              onChange={(e) =>
+                setFormData({ ...formData, precio: Number(e.target.value) })
+              }
+              fullWidth
+            />
+            <TextField
+              label="Total"
+              type="number"
+              value={formData.total}
+              onChange={(e) =>
+                setFormData({ ...formData, total: Number(e.target.value) })
+              }
               fullWidth
             />
             <TextField
               label="Fecha"
               type="date"
               value={formData.fecha}
-              onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fecha: e.target.value })
+              }
               error={!!errors.fecha}
               helperText={errors.fecha}
               required
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
+            <TextField
+              select
+              label="Estado"
+              value={formData.estado}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  estado: e.target.value as
+                    | "Pendiente"
+                    | "Validado"
+                    | "Rechazado",
+                })
+              }
+              fullWidth
+            >
+              <MenuItem value="Pendiente">Pendiente</MenuItem>
+              <MenuItem value="Validado">Validado</MenuItem>
+              <MenuItem value="Rechazado">Rechazado</MenuItem>
+            </TextField>
+            <TextField
+              label="Observaciones"
+              value={formData.observaciones}
+              onChange={(e) =>
+                setFormData({ ...formData, observaciones: e.target.value })
+              }
+              multiline
+              rows={2}
+              fullWidth
+            />
+            <TextField
+              label="Ubicación"
+              value={formData.ubicacion}
+              onChange={(e) =>
+                setFormData({ ...formData, ubicacion: e.target.value })
+              }
+              fullWidth
+            />
+            <Box>
+              <Typography>Evidencias (simulado)</Typography>
+              <input
+                type="file"
+                multiple
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    evidencias: e.target.files
+                      ? Array.from(e.target.files)
+                      : [],
+                  })
+                }
+              />
+            </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Typography>Activo</Typography>
               <input
                 type="checkbox"
                 checked={formData.activo}
-                onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, activo: e.target.checked })
+                }
               />
             </Box>
           </Box>
@@ -357,14 +446,19 @@ export default function Eventos() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      >
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
-          ¿Estás seguro de eliminar el evento {deleteEvento?.nombre}?
+          ¿Estás seguro de eliminar el evento {deleteEvento?.vehiculo}?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>Eliminar</Button>
+          <Button variant="contained" color="error" onClick={handleDelete}>
+            Eliminar
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

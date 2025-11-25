@@ -24,6 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import StopIcon from "@mui/icons-material/Stop";
 import { format } from "date-fns";
+import format from "date-fns/format";
 import type { PrecioCombustible } from "../../types/reports";
 
 interface PreciosTabProps {
@@ -38,9 +39,15 @@ const mockSurtidores = [
   { id: 3, nombre: "SUR-003 - Emergencia" },
 ];
 
-export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProps) {
+export default function PreciosTab({
+  precios,
+  onUpdate,
+  onSave,
+}: PreciosTabProps) {
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingPrecio, setEditingPrecio] = useState<PrecioCombustible | null>(null);
+  const [editingPrecio, setEditingPrecio] = useState<PrecioCombustible | null>(
+    null
+  );
   const [form, setForm] = useState({
     surtidorId: undefined as number | undefined,
     precioLitro: "",
@@ -99,7 +106,9 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
   const handleFinalizar = (id: number) => {
     onUpdate(
       precios.map((p) =>
-        p.id === id ? { ...p, fechaFin: new Date().toISOString(), activo: false } : p
+        p.id === id
+          ? { ...p, fechaFin: new Date().toISOString(), activo: false }
+          : p
       )
     );
     onSave();
@@ -110,7 +119,13 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
       <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2 }}>
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ p: 4, borderBottom: "1px solid #e0e0e0" }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <Box>
                 <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
                   Histórico de Precios
@@ -138,7 +153,7 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
             <TableHead sx={{ bgcolor: "#f8f9fa" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Surtidor</TableCell>
-                <TableCell sx={{ fontWeight:700 }}>Precio/Litro</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Precio/Litro</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Vigencia Desde</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Vigencia Hasta</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
@@ -152,7 +167,8 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
                 <TableRow key={precio.id} hover>
                   <TableCell>
                     {precio.surtidorId
-                      ? mockSurtidores.find((s) => s.id === precio.surtidorId)?.nombre ||
+                      ? mockSurtidores.find((s) => s.id === precio.surtidorId)
+                          ?.nombre ||
                         `SUR-${precio.surtidorId.toString().padStart(3, "0")}`
                       : "Global"}
                   </TableCell>
@@ -161,7 +177,9 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
                       ${precio.precioLitro}
                     </Typography>
                   </TableCell>
-                  <TableCell>{format(new Date(precio.fechaInicio), "dd/MM/yyyy")}</TableCell>
+                  <TableCell>
+                    {format(new Date(precio.fechaInicio), "dd/MM/yyyy")}
+                  </TableCell>
                   <TableCell>
                     {precio.fechaFin ? (
                       format(new Date(precio.fechaFin), "dd/MM/yyyy")
@@ -198,15 +216,26 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
       </Card>
 
       {/* Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingPrecio ? "Editar Precio" : "Nuevo Precio"}</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingPrecio ? "Editar Precio" : "Nuevo Precio"}
+        </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             <Autocomplete
               options={mockSurtidores}
               getOptionLabel={(s) => s.nombre}
-              value={mockSurtidores.find((s) => s.id === form.surtidorId) || null}
-              onChange={(_, newValue) => setForm({ ...form, surtidorId: newValue?.id })}
+              value={
+                mockSurtidores.find((s) => s.id === form.surtidorId) || null
+              }
+              onChange={(_, newValue) =>
+                setForm({ ...form, surtidorId: newValue?.id })
+              }
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -220,9 +249,13 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
               type="number"
               label="Precio por Litro"
               value={form.precioLitro}
-              onChange={(e) => setForm({ ...form, precioLitro: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, precioLitro: e.target.value })
+              }
               InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
               }}
             />
             <TextField
@@ -230,7 +263,9 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
               type="date"
               label="Vigencia Desde"
               value={form.fechaInicio}
-              onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, fechaInicio: e.target.value })
+              }
               InputLabelProps={{ shrink: true }}
             />
             <TextField
@@ -238,7 +273,9 @@ export default function PreciosTab({ precios, onUpdate, onSave }: PreciosTabProp
               rows={2}
               label="Observaciones (Opcional)"
               value={form.observaciones}
-              onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, observaciones: e.target.value })
+              }
             />
           </Box>
         </DialogContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import { Box, Typography, Tabs, Tab, Card, Alert } from "@mui/material";
 import PolicyIcon from "@mui/icons-material/Policy";
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
@@ -24,6 +25,15 @@ import type {
 } from "../../types/reports";
 
 export default function Configuracion() {
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const [tab, setTab] = useState(0);
   const [saved, setSaved] = useState(false);
 
@@ -31,9 +41,9 @@ export default function Configuracion() {
   const [politica, setPolitica] = useState<PoliticaCombustible>(mockPolitica);
   const [precios, setPrecios] = useState<PrecioCombustible[]>(mockPrecios);
   const [umbrales, setUmbrales] = useState<UmbralVehiculo[]>(mockUmbrales);
-  const [configuracionesAlertas, setConfiguracionesAlertas] = useState<ConfiguracionAlerta[]>(
-    mockConfiguracionesAlertas
-  );
+  const [configuracionesAlertas, setConfiguracionesAlertas] = useState<
+    ConfiguracionAlerta[]
+  >(mockConfiguracionesAlertas);
 
   const handleSave = () => {
     setSaved(true);
@@ -41,7 +51,10 @@ export default function Configuracion() {
     console.log("Configuración guardada");
   };
 
-  const handleToggleAlerta = (tipoAlerta: string, config: ConfiguracionAlerta | undefined) => {
+  const handleToggleAlerta = (
+    tipoAlerta: string,
+    config: ConfiguracionAlerta | undefined
+  ) => {
     if (config) {
       setConfiguracionesAlertas(
         configuracionesAlertas.map((c) =>
@@ -57,7 +70,7 @@ export default function Configuracion() {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
-          Configuración  
+          Configuración
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Gestión de políticas, precios, umbrales y alertas
@@ -71,7 +84,10 @@ export default function Configuracion() {
       )}
 
       {/* Tabs */}
-      <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2, mb: 3 }}>
+      <Card
+        elevation={0}
+        sx={{ border: "1px solid #e0e0e0", borderRadius: 2, mb: 3 }}
+      >
         <Tabs
           value={tab}
           onChange={(_, newValue) => setTab(newValue)}
@@ -86,28 +102,59 @@ export default function Configuracion() {
             },
           }}
         >
-          <Tab icon={<PolicyIcon />} iconPosition="start" label="Políticas de Evidencias" />
+          <Tab
+            icon={<PolicyIcon />}
+            iconPosition="start"
+            label="Políticas de Evidencias"
+          />
           <Tab
             icon={<LocalGasStationIcon />}
             iconPosition="start"
             label="Precios de Combustible"
           />
-          <Tab icon={<DirectionsCarIcon />} iconPosition="start" label="Umbrales por Vehículo" />
-          <Tab icon={<NotificationsIcon />} iconPosition="start" label="Alertas" />
+          <Tab
+            icon={<DirectionsCarIcon />}
+            iconPosition="start"
+            label="Umbrales por Vehículo"
+          />
+          <Tab
+            icon={<NotificationsIcon />}
+            iconPosition="start"
+            label="Alertas"
+          />
         </Tabs>
       </Card>
 
       {/* Tab Content */}
       {tab === 0 && (
-        <PoliticasTab politica={politica} onChange={setPolitica} onSave={handleSave} />
+        <PoliticasTab
+          politica={politica}
+          onChange={setPolitica}
+          onSave={handleSave}
+        />
       )}
 
-      {tab === 1 && <PreciosTab precios={precios} onUpdate={setPrecios} onSave={handleSave} />}
+      {tab === 1 && (
+        <PreciosTab
+          precios={precios}
+          onUpdate={setPrecios}
+          onSave={handleSave}
+        />
+      )}
 
-      {tab === 2 && <UmbralesTab umbrales={umbrales} onUpdate={setUmbrales} onSave={handleSave} />}
+      {tab === 2 && (
+        <UmbralesTab
+          umbrales={umbrales}
+          onUpdate={setUmbrales}
+          onSave={handleSave}
+        />
+      )}
 
       {tab === 3 && (
-        <AlertasTab configuraciones={configuracionesAlertas} onToggle={handleToggleAlerta} />
+        <AlertasTab
+          configuraciones={configuracionesAlertas}
+          onToggle={handleToggleAlerta}
+        />
       )}
     </Box>
   );

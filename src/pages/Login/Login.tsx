@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import {
@@ -22,6 +23,15 @@ import backgroundImage from "../../assets/images/LoginFondo.png";
 type UserType = "admin" | "superadmin";
 
 export default function Login() {
+  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <SkeletonLoading height={48} count={1} />
+        <SkeletonLoading height={120} count={4} />
+      </Box>
+    );
+  }
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [userType, setUserType] = useState<UserType>("admin");
