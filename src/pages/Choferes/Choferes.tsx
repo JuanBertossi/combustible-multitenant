@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -26,11 +26,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { useAuth } from "../../hooks/useAuth";
-import { useTenant } from "../../hooks/useTenant";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTenant } from "../../../hooks/useTenant";
 import * as XLSX from "xlsx";
-import { choferService } from "../../services/ChoferService";
-import type { Chofer, FormErrors } from "../../types";
+import { choferService } from "../../../services/ChoferService";
+import type { Chofer, FormErrors } from "../../../types";
 
 interface ChoferFormData {
   nombre: string;
@@ -562,4 +562,3 @@ export default function Choferes() {
     </Box>
   );
 }
-

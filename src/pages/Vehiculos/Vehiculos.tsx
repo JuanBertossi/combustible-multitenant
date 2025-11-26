@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -24,12 +24,12 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { vehiculoService } from "../../services/VehiculoService";
-import { useAuth } from "../../hooks/useAuth";
-import { useTenant } from "../../hooks/useTenant";
-import { TIPOS_VEHICULO } from "../../utils/constants";
+import { vehiculoService } from "../../../services/VehiculoService";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTenant } from "../../../hooks/useTenant";
+import { TIPOS_VEHICULO } from "../../../utils/constants";
 import * as XLSX from "xlsx";
-import type { Vehiculo, TipoVehiculo, FormErrors } from "../../types";
+import type { Vehiculo, TipoVehiculo, FormErrors } from "../../../types";
 
 interface VehiculoFormData {
   patente: string;
@@ -605,4 +605,3 @@ export default function Vehiculos() {
     </Box>
   );
 }
-

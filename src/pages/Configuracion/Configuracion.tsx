@@ -6,26 +6,25 @@ import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-import PoliticasTab from "../../components/configuracion/PoliticasTab";
-import PreciosTab from "../../components/configuracion/PreciosTab";
-import UmbralesTab from "../../components/configuracion/UmbralesTab";
-import AlertasTab from "../../components/configuracion/AlertasTab";
+import PoliticasTab from "../../configuracion/PoliticasTab";
+import PreciosTab from "../../configuracion/PreciosTab";
+import UmbralesTab from "../../configuracion/UmbralesTab";
+import AlertasTab from "../../configuracion/AlertasTab";
 
 import {
   mockPolitica,
   mockPrecios,
   mockUmbrales,
   mockConfiguracionesAlertas,
-} from "../../utils/mockPoliticas";
+} from "../../../utils/mockPoliticas";
 import type {
   PoliticaCombustible,
   PrecioCombustible,
   UmbralVehiculo,
   ConfiguracionAlerta,
-} from "../../types/reports";
+} from "../../../types/reports";
 
 export default function Configuracion() {
-
   const [tab, setTab] = useState(0);
   const [saved, setSaved] = useState(false);
 
@@ -43,9 +42,7 @@ export default function Configuracion() {
     console.log("Configuración guardada");
   };
 
-  const handleToggleAlerta = (
-    config: ConfiguracionAlerta | undefined
-  ) => {
+  const handleToggleAlerta = (config: ConfiguracionAlerta | undefined) => {
     if (config) {
       setConfiguracionesAlertas(
         configuracionesAlertas.map((c) =>

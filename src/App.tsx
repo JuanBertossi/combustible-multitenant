@@ -8,21 +8,27 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import { TenantProvider } from "./context/TenantContext";
 
 // Lazy loading de páginas para mejorar rendimiento
-const Login = lazy(() => import("./pages/Login/Login"));
-const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const Empresas = lazy(() => import("./pages/Empresas/Empresas"));
-const Usuarios = lazy(() => import("./pages/Usuarios/Usuarios"));
-const Vehiculos = lazy(() => import("./pages/Vehiculos/Vehiculos"));
-const Choferes = lazy(() => import("./pages/Choferes/Choferes"));
-const Eventos = lazy(() => import("./pages/Eventos/Eventos"));
+const Login = lazy(() => import("./components/pages/Login/Login"));
+const Dashboard = lazy(() => import("./components/pages/Dashboard/Dashboard"));
+const Empresas = lazy(() => import("./components/pages/Empresas/Empresas"));
+const Usuarios = lazy(() => import("./components/pages/Usuarios/Usuarios"));
+const Vehiculos = lazy(() => import("./components/pages/Vehiculos/Vehiculos"));
+const Choferes = lazy(() => import("./components/pages/Choferes/Choferes"));
+const Eventos = lazy(() => import("./components/pages/Eventos/Eventos"));
 const ValidacionEventos = lazy(
-  () => import("./pages/Validacion/ValidacionEventos")
+  () => import("./components/pages/Validacion/ValidacionEventos")
 );
-const Configuracion = lazy(() => import("./pages/Configuracion/Configuracion"));
-const Surtidores = lazy(() => import("./pages/Surtidores/Surtidores"));
-const Tanques = lazy(() => import("./pages/Tanques/Tanques"));
-const CentrosCosto = lazy(() => import("./pages/CentroCosto/CentrosCosto"));
-const Reportes = lazy(() => import("./pages/reportes/Reportes"));
+const Configuracion = lazy(
+  () => import("./components/pages/Configuracion/Configuracion")
+);
+const Surtidores = lazy(
+  () => import("./components/pages/Surtidores/Surtidores")
+);
+const Tanques = lazy(() => import("./components/pages/Tanques/Tanques"));
+const CentrosCosto = lazy(
+  () => import("./components/pages/CentroCosto/CentrosCosto")
+);
+const Reportes = lazy(() => import("./components/pages/reportes/Reportes"));
 
 /**
  * Componente de carga mientras se cargan las páginas lazy
@@ -191,16 +197,26 @@ function AppRoutes() {
  * Componente principal de la aplicación
  */
 function App() {
+  //   return (
+  //     <ErrorBoundary>
+  //       <AuthProvider>
+  //         <TenantProvider>
+  //           <AppRoutes />
+  //         </TenantProvider>
+  //       </AuthProvider>
+  //     </ErrorBoundary>
+  //   );
+  // }
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <TenantProvider>
-          <AppRoutes />
-        </TenantProvider>
-      </AuthProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TenantProvider>
+        <ThemeProvider defaultTheme="system" storageKey="multitenant-ui-theme">
+          <Routing />
+          <Toaster />
+        </ThemeProvider>
+      </TenantProvider>
+    </QueryClientProvider>
   );
 }
 
 export default App;
-

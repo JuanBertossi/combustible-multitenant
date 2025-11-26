@@ -18,23 +18,15 @@ const IS_MOCKING = true;
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export const eventosService = {
-  getAll: async (
-    empresaId: number | null = null,
-    filters: EventoFilters = {}
-  ): Promise<Evento[]> => {
+  getAll: async (filters: EventoFilters = {}): Promise<Evento[]> => {
     // --- INICIO DE SIMULACIÓN ---
     if (IS_MOCKING) {
-      console.log("SIMULANDO API (getAll):", { empresaId, filters });
+      console.log("SIMULANDO API (getAll):", { filters });
       await delay(300); // Simula 0.3s de espera
 
       // Lógica de filtrado simulada (igual a la que haría el backend)
       let eventosFiltrados = mockEventos;
-
-      if (empresaId) {
-        eventosFiltrados = eventosFiltrados.filter(
-          (e) => e.empresaId === empresaId
-        );
-      }
+      // El filtro por empresaId ahora se hace automáticamente por el interceptor en modo real
       if (filters.estado) {
         eventosFiltrados = eventosFiltrados.filter(
           (e) => e.estado === filters.estado
@@ -52,8 +44,9 @@ export const eventosService = {
     // --- FIN DE SIMULACIÓN ---
 
     // Código original (se ejecutará si IS_MOCKING = false)
-    const params = { empresaId, ...filters };
-    const response = await apiClient.get<Evento[]>("/eventos", { params });
+    const response = await apiClient.get<Evento[]>("/eventos", {
+      params: filters,
+    });
     return response.data;
   },
 

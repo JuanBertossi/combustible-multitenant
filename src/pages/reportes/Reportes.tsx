@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Grid,
@@ -44,7 +44,7 @@ import {
   mockCostoPorCentroCosto,
   mockDesvios,
   mockRankingEficiencia,
-} from "../../utils/mockReportes";
+} from "../../../utils/mockReportes";
 import * as XLSX from "xlsx";
 
 type TipoReporte =
@@ -65,7 +65,6 @@ const COLORS = [
 ];
 
 export default function Reportes() {
-
   const [tipoReporte, setTipoReporte] =
     useState<TipoReporte>("consumo-vehiculos");
 

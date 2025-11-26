@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -25,11 +25,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { useAuth } from "../../hooks/useAuth";
-import { useTenant } from "../../hooks/useTenant";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTenant } from "../../../hooks/useTenant";
 import * as XLSX from "xlsx";
-import { surtidorService } from "../../services/SurtidorService";
-import type { SurtidorExtended, FormErrors } from "../../types";
+import { surtidorService } from "../../../services/SurtidorService";
+import type { SurtidorExtended, FormErrors } from "../../../types";
 
 const TIPOS_COMBUSTIBLE: string[] = ["Diésel", "Nafta", "GNC", "GLP"];
 
@@ -565,4 +565,3 @@ export default function Surtidores() {
     </Box>
   );
 }
-

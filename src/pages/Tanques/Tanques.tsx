@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -26,11 +26,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WarningIcon from "@mui/icons-material/Warning";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { useAuth } from "../../hooks/useAuth";
-import { useTenant } from "../../hooks/useTenant";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTenant } from "../../../hooks/useTenant";
 import * as XLSX from "xlsx";
-import { tanqueService } from "../../services/TanqueService";
-import type { TanqueExtended, FormErrors } from "../../types";
+import { tanqueService } from "../../../services/TanqueService";
+import type { TanqueExtended, FormErrors } from "../../../types";
 
 const TIPOS_COMBUSTIBLE: string[] = ["Diésel", "Nafta", "GNC", "GLP"];
 
@@ -714,4 +714,3 @@ export default function Tanques() {
     </Box>
   );
 }
-

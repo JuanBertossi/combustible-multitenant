@@ -1,7 +1,7 @@
 import { useState } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import {
   Box,
   Card,
@@ -17,7 +17,7 @@ import {
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import { mockUser, mockSuperAdmin } from "../../utils/mockData";
+import { mockUser, mockSuperAdmin } from "../../../utils/mockData";
 import backgroundImage from "../../assets/images/LoginFondo.png";
 
 type UserType = "admin" | "superadmin";

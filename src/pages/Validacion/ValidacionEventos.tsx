@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Typography,
@@ -22,20 +22,20 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
-import EventoDetalle from "../../components/eventos/EventoDetalle";
-import { mockEventos } from "../../utils/mockData";
-import { getEvidenciasByEvento } from "../../utils/mockEvidencias";
-import { useAuth } from "../../hooks/useAuth";
+import EventoDetalle from "../../eventos/EventoDetalle";
+import { mockEventos } from "../../../utils/mockData";
+import { getEvidenciasByEvento } from "../../../utils/mockEvidencias";
+import { useAuth } from "../../../hooks/useAuth";
 import { format } from "date-fns";
 
-import { ESTADOS_EVENTO } from "../../utils/constants";
-import type { Evento } from "../../types";
+import { ESTADOS_EVENTO } from "../../../utils/constants";
+import type { Evento } from "../../../types";
 import {
   validarEventoConPoliticas,
   getResumenValidacion,
   ValidationResult,
-} from "../../utils/validacionPoliticas";
-import { mockPolitica, mockUmbrales } from "../../utils/mockPoliticas";
+} from "../../../utils/validacionPoliticas";
+import { mockPolitica, mockUmbrales } from "../../../utils/mockPoliticas";
 
 interface EventoExtended extends Evento {
   vehiculo?: string;
@@ -546,4 +546,3 @@ export default function ValidacionEventos() {
     </Box>
   );
 }
-

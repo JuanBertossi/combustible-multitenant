@@ -25,14 +25,9 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${user.token}`;
         }
 
-        // Agregar Tenant-ID header (solo si no es SuperAdmin)
-        if (user.empresaId && user.rol !== "SuperAdmin") {
+        // Agregar Tenant-ID header SIEMPRE que el usuario tenga empresaId
+        if (user.empresaId) {
           config.headers["X-Tenant-ID"] = user.empresaId.toString();
-        }
-
-        // Para SuperAdmin, puede enviar tenantId como parámetro opcional
-        if (user.rol === "SuperAdmin" && config.params?.tenantId) {
-          config.headers["X-Tenant-ID"] = config.params.tenantId;
         }
       } catch (error) {
         console.error("Error parsing user from localStorage:", error);

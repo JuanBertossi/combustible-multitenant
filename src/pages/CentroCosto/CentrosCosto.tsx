@@ -26,10 +26,10 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { mockCentrosCosto } from "../../utils/mockData";
-import { useAuth } from "../../hooks/useAuth";
+import { mockCentrosCosto } from "../../../utils/mockData";
+import { useAuth } from "../../../hooks/useAuth";
 import * as XLSX from "xlsx";
-import type { CentroCosto, TipoCentroCosto, FormErrors } from "../../types";
+import type { CentroCosto, TipoCentroCosto, FormErrors } from "../../../types";
 
 const TIPOS_CENTRO_COSTO: TipoCentroCosto[] = [
   "Lote",
@@ -47,7 +47,6 @@ interface FormData {
 }
 
 export default function CentrosCosto() {
-
   const { user } = useAuth();
   const [items, setItems] = useState<CentroCosto[]>(mockCentrosCosto);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -508,4 +507,3 @@ export default function CentrosCosto() {
     </Box>
   );
 }
-

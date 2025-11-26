@@ -14,20 +14,20 @@ import {
 } from "@mui/material";
 import VirtualizedTable, {
   DataTableColumn,
-} from "../../components/common/DataTable/VirtualizedTable";
+} from "../../common/DataTable/VirtualizedTable";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import * as XLSX from "xlsx";
-import { useAuth } from "../../hooks/useAuth";
-import { useTenant } from "../../hooks/useTenant";
-import { eventoService } from "../../services/EventoService";
-import type { EventoExtended, FormErrors } from "../../types";
+import { useAuth } from "../../../hooks/useAuth";
+import { useTenant } from "../../../hooks/useTenant";
+import { eventoService } from "../../../services/EventoService";
+import type { EventoExtended, FormErrors } from "../../../types";
 import {
   mockVehiculos,
   mockChoferes,
   mockSurtidores,
-} from "../../utils/mockData";
+} from "../../../utils/mockData";
 
 interface EventoFormData {
   vehiculoId: number | "";
@@ -51,7 +51,9 @@ export default function Eventos() {
   // const [loading, setLoading] = useState<boolean>(true); // Removed unused loading
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(null);
+  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(
+    null
+  );
   const [deleteEvento, setDeleteEvento] = useState<EventoExtended | null>(null);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -76,7 +78,6 @@ export default function Eventos() {
     const fetchData = async () => {
       const data = await eventoService.getAll();
       setEventos(data);
-
     };
     fetchData();
   }, []);

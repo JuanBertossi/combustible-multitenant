@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
   Button,
@@ -15,10 +15,10 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import DataTable from "../../components/common/DataTable/DataTable";
-import { mockEmpresas } from "../../utils/mockData";
-import { TIPOS_MERCADO } from "../../utils/constants";
-import type { Empresa, TipoMercado, FormErrors } from "../../types";
+import DataTable from "../../common/DataTable/DataTable";
+import { mockEmpresas } from "../../../utils/mockData";
+import { TIPOS_MERCADO } from "../../../utils/constants";
+import type { Empresa, TipoMercado, FormErrors } from "../../../types";
 
 interface EmpresaFormData {
   nombre: string;
@@ -302,4 +302,3 @@ export default function Empresas() {
     </Box>
   );
 }
-
