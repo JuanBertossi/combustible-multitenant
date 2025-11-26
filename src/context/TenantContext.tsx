@@ -148,3 +148,4 @@ export function TenantProvider({ children }: TenantProviderProps) {
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
 }
+

@@ -24,7 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import StopIcon from "@mui/icons-material/Stop";
 import { format } from "date-fns";
-import format from "date-fns/format";
+
 import type { PrecioCombustible } from "../../types/reports";
 
 interface PreciosTabProps {
@@ -293,3 +293,4 @@ export default function PreciosTab({
     </>
   );
 }
+

@@ -29,8 +29,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTenant } from "../../hooks/useTenant";
 import { TIPOS_VEHICULO } from "../../utils/constants";
 import * as XLSX from "xlsx";
-import PermissionGuard from "../../components/common/PermissionGuard";
-import { PERMISSIONS } from "../../utils/permissions";
 import type { Vehiculo, TipoVehiculo, FormErrors } from "../../types";
 
 interface VehiculoFormData {
@@ -344,7 +342,7 @@ export default function Vehiculos() {
       <Grid container spacing={3}>
         {filteredVehiculos.map((vehiculo) => (
           /* @ts-expect-error - MUI v7 Grid type incompatibility */
-          <Grid item xs={12} sm={6} md={4} lg={3} key={vehiculo.id}>
+          <Grid xs={12} sm={6} md={4} lg={3} key={vehiculo.id}>
             <Card
               elevation={0}
               sx={{
@@ -607,3 +605,4 @@ export default function Vehiculos() {
     </Box>
   );
 }
+

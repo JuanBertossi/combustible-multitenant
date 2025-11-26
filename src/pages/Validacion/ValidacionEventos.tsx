@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import PendingIcon from "@mui/icons-material/Pending";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -28,7 +27,7 @@ import { mockEventos } from "../../utils/mockData";
 import { getEvidenciasByEvento } from "../../utils/mockEvidencias";
 import { useAuth } from "../../hooks/useAuth";
 import { format } from "date-fns";
-import format from "date-fns/format";
+
 import { ESTADOS_EVENTO } from "../../utils/constants";
 import type { Evento } from "../../types";
 import {
@@ -51,7 +50,8 @@ interface EventoExtended extends Evento {
 }
 
 export default function ValidacionEventos() {
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  const { user } = useAuth();
+  const [loading] = useState<boolean>(false); // Simulación de loading visual
   if (loading) {
     return (
       <Box sx={{ p: 4 }}>
@@ -60,7 +60,6 @@ export default function ValidacionEventos() {
       </Box>
     );
   }
-  const { user } = useAuth();
   const [eventos, setEventos] = useState<EventoExtended[]>(
     mockEventos as EventoExtended[]
   );
@@ -219,7 +218,7 @@ export default function ValidacionEventos() {
 
           return (
             /* @ts-expect-error - MUI v7 Grid type incompatibility */
-            <Grid item xs={12} md={6} lg={4} key={evento.id}>
+            <Grid xs={12} md={6} lg={4} key={evento.id}>
               <Card
                 elevation={0}
                 sx={{
@@ -352,7 +351,7 @@ export default function ValidacionEventos() {
                   >
                     <Grid container spacing={2}>
                       {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <Typography variant="caption" color="text.secondary">
                           Litros
                         </Typography>
@@ -365,7 +364,7 @@ export default function ValidacionEventos() {
                         </Typography>
                       </Grid>
                       {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <Typography variant="caption" color="text.secondary">
                           Costo
                         </Typography>
@@ -547,3 +546,4 @@ export default function ValidacionEventos() {
     </Box>
   );
 }
+

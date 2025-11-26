@@ -2,7 +2,7 @@
 // Tipos de Autenticación y Usuario
 // ============================================
 
-export type UserRole = "SuperAdmin" | "Admin" | "Supervisor" | "Operador";
+export type UserRole = "SuperAdmin" | "Admin" | "Supervisor" | "Operador" | "Auditor";
 
 export interface User {
   id: number;
@@ -121,6 +121,9 @@ export interface Evento {
   total?: number;
   surtidorId?: number;
   surtidorNombre?: string;
+  kmFinal?: number;
+  latitud?: number;
+  longitud?: number;
   observaciones?: string;
   estado: EstadoEvento;
   empresaId: number;
@@ -177,6 +180,7 @@ export interface Tanque {
   nombre: string;
   tipoCombustible: TipoCombustible;
   capacidadTotal: number;
+  capacidadMaxima?: number;
   nivelActual: number;
   nivelMinimo: number;
   ubicacion: string;

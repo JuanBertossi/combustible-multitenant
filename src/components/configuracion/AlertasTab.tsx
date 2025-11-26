@@ -15,7 +15,7 @@ import type { ConfiguracionAlerta } from "../../types/reports";
 
 interface AlertasTabProps {
   configuraciones: ConfiguracionAlerta[];
-  onToggle: (tipoAlerta: string, config: ConfiguracionAlerta | undefined) => void;
+  onToggle: (config: ConfiguracionAlerta | undefined) => void;
 }
 
 export default function AlertasTab({ configuraciones, onToggle }: AlertasTabProps) {
@@ -31,6 +31,7 @@ export default function AlertasTab({ configuraciones, onToggle }: AlertasTabProp
 
         <Grid container spacing={3}>
           {configuraciones.map((config) => (
+            /* @ts-expect-error - MUI v7 Grid type incompatibility */
             <Grid item xs={12} md={6} key={config.id}>
               <Card variant="outlined">
                 <CardContent>
@@ -53,7 +54,7 @@ export default function AlertasTab({ configuraciones, onToggle }: AlertasTabProp
                     </Box>
                     <Switch
                       checked={config.habilitada}
-                      onChange={() => onToggle(config.tipoAlerta, config)}
+                      onChange={() => onToggle(config)}
                     />
                   </Box>
 
@@ -94,3 +95,4 @@ export default function AlertasTab({ configuraciones, onToggle }: AlertasTabProp
     </Card>
   );
 }
+

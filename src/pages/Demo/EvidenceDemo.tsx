@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Container, Typography, Divider, Grid } from "@mui/material";
 import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import {
@@ -74,7 +75,7 @@ const mockLocation: Evidencia = {
 };
 
 export default function EvidenceDemo() {
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  const [loading] = useState<boolean>(false); // Simulación de loading visual
   if (loading) {
     return (
       <Box sx={{ p: 4 }}>
@@ -158,8 +159,7 @@ export default function EvidenceDemo() {
 
         <Grid container spacing={3}>
           {/* Upload de Fotos */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
               Fotos de Surtidor
             </Typography>
@@ -173,8 +173,7 @@ export default function EvidenceDemo() {
           </Grid>
 
           {/* Upload de Audio */}
-          {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
               Nota de Voz
             </Typography>
@@ -192,3 +191,4 @@ export default function EvidenceDemo() {
     </Container>
   );
 }
+

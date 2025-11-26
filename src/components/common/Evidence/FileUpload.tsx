@@ -128,7 +128,7 @@ export default function FileUpload({
     setFiles((prev) => {
       const newFiles = [...prev];
       // Revocar URL de preview
-      if (newFiles[index].preview) {
+      if (newFiles[index]?.preview) {
         URL.revokeObjectURL(newFiles[index].preview!);
       }
       newFiles.splice(index, 1);
@@ -379,3 +379,4 @@ export default function FileUpload({
     </Box>
   );
 }
+

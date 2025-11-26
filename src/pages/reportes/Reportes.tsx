@@ -65,15 +65,7 @@ const COLORS = [
 ];
 
 export default function Reportes() {
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
-  if (loading) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <SkeletonLoading height={48} count={1} />
-        <SkeletonLoading height={120} count={4} />
-      </Box>
-    );
-  }
+
   const [tipoReporte, setTipoReporte] =
     useState<TipoReporte>("consumo-vehiculos");
 
@@ -474,7 +466,7 @@ export default function Reportes() {
                 <ResponsiveContainer width="100%" height={400}>
                   <PieChart>
                     <Pie
-                      data={mockLitrosPorSurtidor}
+                      data={mockLitrosPorSurtidor as any}
                       dataKey="litrosTotales"
                       nameKey="surtidorNombre"
                       cx="50%"

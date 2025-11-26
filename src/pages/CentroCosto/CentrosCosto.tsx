@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
+
 import {
   Box,
   Button,
@@ -47,15 +47,7 @@ interface FormData {
 }
 
 export default function CentrosCosto() {
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
-  if (loading) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <SkeletonLoading height={48} count={1} />
-        <SkeletonLoading height={120} count={4} />
-      </Box>
-    );
-  }
+
   const { user } = useAuth();
   const [items, setItems] = useState<CentroCosto[]>(mockCentrosCosto);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -276,7 +268,7 @@ export default function CentrosCosto() {
         {filteredItems.map((item) => {
           return (
             /* @ts-expect-error - MUI v7 Grid type incompatibility */
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <Grid xs={12} sm={6} md={4} key={item.id}>
               <Card
                 elevation={0}
                 sx={{
@@ -516,3 +508,4 @@ export default function CentrosCosto() {
     </Box>
   );
 }
+

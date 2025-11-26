@@ -239,3 +239,4 @@ export default function VirtualizedTable<T extends { id: number | string }>(
   );
   // Fin del componente
 }
+

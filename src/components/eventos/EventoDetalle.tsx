@@ -22,13 +22,10 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import {
   ImageGallery,
   AudioPlayer,
-  LocationMap,
 } from "../../components/common/Evidence";
 import type { Evento } from "../../types";
 import type { Evidencia } from "../../types/reports";
 import { format } from "date-fns";
-import format from "date-fns/format";
-import { Map } from "@google-maps/map";
 
 interface EventoDetalleProps {
   open: boolean;
@@ -51,7 +48,6 @@ export default function EventoDetalle({
 
   const fotos = evidencias.filter((e) => e.tipo.startsWith("foto"));
   const audio = evidencias.find((e) => e.tipo === "audio");
-  const ubicacion = evidencias.find((e) => e.tipo === "ubicacion");
 
   const handleDownload = (evidencia: Evidencia) => {
     console.log("Descargando evidencia:", evidencia);
@@ -366,7 +362,7 @@ export default function EventoDetalle({
                 </Box>
               )} */}
 
-              <Map />
+
             </>
           )}
         </Box>

@@ -63,6 +63,7 @@ export default function Header() {
       SuperAdmin: { bg: "#8b5cf615", color: "#8b5cf6" },
       Supervisor: { bg: "#f59e0b15", color: "#f59e0b" },
       Operador: { bg: "#3b82f615", color: "#3b82f6" },
+      Auditor: { bg: "#10b98115", color: "#10b981" },
     };
     return rol ? colors[rol] : { bg: "#99999915", color: "#999" };
   };
@@ -361,3 +362,4 @@ export default function Header() {
     </AppBar>
   );
 }
+

@@ -86,7 +86,7 @@ export default function ImageGallery({
       <Grid container spacing={2}>
         {images.map((image, index) => (
           // @ts-expect-error - MUI v7 Grid type incompatibility
-          <Grid item xs={6} sm={4} md={3} key={image.id}>
+          <Grid xs={6} sm={4} md={3} key={image.id}>
             <Card
               elevation={0}
               sx={{
@@ -335,3 +335,4 @@ export default function ImageGallery({
     </>
   );
 }
+

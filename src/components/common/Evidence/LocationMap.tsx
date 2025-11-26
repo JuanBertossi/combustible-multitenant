@@ -48,9 +48,7 @@ export default function LocationMap({
     );
   }
 
-  // URL para Google Maps Embed (o puedes usar Leaflet u OpenStreetMap)
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${latitude},${longitude}&zoom=15`;
-  
+
   // Alternativa sin API key usando iframe simple de OpenStreetMap
   const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.01},${latitude - 0.01},${longitude + 0.01},${latitude + 0.01}&layer=mapnik&marker=${latitude},${longitude}`;
 

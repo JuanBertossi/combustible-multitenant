@@ -31,7 +31,7 @@ export default function Empresas() {
   const [empresas, setEmpresas] = useState<Empresa[]>(
     mockEmpresas as Empresa[]
   );
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading
+  const [loading] = useState<boolean>(false); // Simulación de loading
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
@@ -214,7 +214,7 @@ export default function Empresas() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="Nombre de la Empresa"
@@ -229,7 +229,7 @@ export default function Empresas() {
             </Grid>
 
             {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="CUIT"
@@ -245,7 +245,7 @@ export default function Empresas() {
             </Grid>
 
             {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 select
@@ -302,3 +302,4 @@ export default function Empresas() {
     </Box>
   );
 }
+

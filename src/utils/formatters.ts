@@ -1,6 +1,5 @@
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
-import es from "date-fns/locale/es";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 /**
  * Formatea una fecha en el formato especificado

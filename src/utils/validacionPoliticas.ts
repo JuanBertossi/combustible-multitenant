@@ -3,7 +3,6 @@ import type {
   Evidencia,
   PoliticaCombustible,
   UmbralVehiculo,
-  TipoEvidencia,
 } from "../types/reports";
 import { mockVehiculos } from "./mockData";
 

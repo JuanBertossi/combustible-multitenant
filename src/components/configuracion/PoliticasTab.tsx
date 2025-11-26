@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import {
   Box,
   Card,
@@ -35,7 +35,7 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
         <Grid container spacing={4}>
           {/* Evidencias Fotográficas */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Evidencias Fotográficas
             </Typography>
@@ -113,7 +113,7 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
 
           {/* Otras Evidencias */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Otras Evidencias
             </Typography>
@@ -159,13 +159,13 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
 
           {/* Validaciones */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Validaciones
             </Typography>
             <Grid container spacing={2}>
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   type="number"
@@ -180,7 +180,7 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
                 />
               </Grid>
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -199,7 +199,7 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
 
           {/* Botón Guardar */}
           {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
               <Button
                 variant="contained"
@@ -221,3 +221,4 @@ export default function PoliticasTab({ politica, onChange, onSave }: PoliticasTa
     </Card>
   );
 }
+

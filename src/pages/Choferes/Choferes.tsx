@@ -323,7 +323,7 @@ export default function Choferes() {
       <Grid container spacing={3}>
         {filteredChoferes.map((chofer) => (
           /* @ts-expect-error - MUI v7 Grid type incompatibility */
-          <Grid item xs={12} sm={6} md={4} lg={3} key={chofer.id}>
+          <Grid xs={12} sm={6} md={4} lg={3} key={chofer.id}>
             <Card
               elevation={0}
               sx={{
@@ -562,3 +562,4 @@ export default function Choferes() {
     </Box>
   );
 }
+

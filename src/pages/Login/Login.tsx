@@ -23,7 +23,7 @@ import backgroundImage from "../../assets/images/LoginFondo.png";
 type UserType = "admin" | "superadmin";
 
 export default function Login() {
-  const [loading, setLoading] = useState<boolean>(false); // Simulación de loading visual
+  const [loading] = useState<boolean>(false); // Simulación de loading visual
   if (loading) {
     return (
       <Box sx={{ p: 4 }}>

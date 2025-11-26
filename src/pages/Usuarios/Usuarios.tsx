@@ -1,8 +1,3 @@
-function getInitials(nombre: string, apellido: string): string {
-  const n = nombre.trim().charAt(0);
-  const a = apellido.trim().charAt(0);
-  return (n + a).toUpperCase();
-}
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -21,9 +16,9 @@ import {
   Avatar,
   Chip,
   IconButton,
+  LinearProgress,
+
 } from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";
-import SkeletonLoading from "../../components/common/SkeletonLoading/SkeletonLoading";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
@@ -38,7 +33,6 @@ import { ROLES } from "../../utils/constants";
 import * as XLSX from "xlsx";
 import type { Usuario, UserRole, FormErrors } from "../../types";
 
-// Extended Usuario interface for this page with mock data fields
 interface UsuarioExtended extends Usuario {
   apellido?: string;
   whatsapp?: string;
@@ -53,33 +47,40 @@ interface UsuarioFormData {
   activo: boolean;
 }
 
-const roles: UserRole[] = [
-  ROLES.ADMIN as UserRole,
-  ROLES.SUPERVISOR as UserRole,
-  ROLES.OPERADOR as UserRole,
-];
+// Helper functions
+const getInitials = (nombre: string, apellido?: string): string => {
+  const first = nombre?.charAt(0) ?? "";
+  const second = apellido?.charAt(0) ?? "";
+  return (first + second).toUpperCase();
+};
+
+const getAvatarColor = (name: string): string => {
+  const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index] ?? "#999";
+};
+
+const getRolColor = (rol: UserRole): { bg: string; color: string } => {
+  const colors: Record<UserRole, { bg: string; color: string }> = {
+    SuperAdmin: { bg: "#dc262615", color: "#dc2626" },
+    Admin: { bg: "#ef444415", color: "#ef4444" },
+    Supervisor: { bg: "#f59e0b15", color: "#f59e0b" },
+    Operador: { bg: "#3b82f615", color: "#3b82f6" },
+    Auditor: { bg: "#10b98115", color: "#10b981" },
+  };
+  return colors[rol] || { bg: "#99999915", color: "#999" };
+};
 
 export default function Usuarios() {
-  if (loading) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <SkeletonLoading height={48} count={1} />
-        <SkeletonLoading height={120} count={4} />
-      </Box>
-    );
-  }
   const { user } = useAuth();
   const { currentTenant } = useTenant();
+
   const [usuarios, setUsuarios] = useState<UsuarioExtended[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingUsuario, setEditingUsuario] = useState<UsuarioExtended | null>(
-    null
-  );
-  const [deleteUsuario, setDeleteUsuario] = useState<UsuarioExtended | null>(
-    null
-  );
+  const [editingUsuario, setEditingUsuario] = useState<UsuarioExtended | null>(null);
+  const [deleteUsuario, setDeleteUsuario] = useState<UsuarioExtended | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterRol, setFilterRol] = useState<string>("Todos");
   const [formData, setFormData] = useState<UsuarioFormData>({
@@ -92,7 +93,7 @@ export default function Usuarios() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Load usuarios on component mount
+  // Load data on mount
   useEffect(() => {
     const fetchData = async () => {
       const data = await usuarioService.getAll();
@@ -102,15 +103,11 @@ export default function Usuarios() {
     fetchData();
   }, []);
 
-  const usuariosPorEmpresa = usuarios.filter(
-    (u) => u.empresaId === currentTenant?.id
-  );
-
+  const usuariosPorEmpresa = usuarios.filter((u) => u.empresaId === currentTenant?.id);
   const filteredUsuarios = usuariosPorEmpresa.filter((u) => {
     const matchSearch =
       u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (u.apellido &&
-        u.apellido.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (u.apellido && u.apellido.toLowerCase().includes(searchTerm.toLowerCase())) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchRol = filterRol === "Todos" || u.rol === filterRol;
     return matchSearch && matchRol;
@@ -126,26 +123,15 @@ export default function Usuarios() {
       Estado: u.activo ? "Activo" : "Inactivo",
       ...(user?.rol === "SuperAdmin" && { Empresa: u.empresaNombre }),
     }));
-
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
-    XLSX.writeFile(
-      wb,
-      `Usuarios_${new Date().toISOString().split("T")[0]}.xlsx`
-    );
+    XLSX.writeFile(wb, `Usuarios_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
   const handleNew = (): void => {
     setEditingUsuario(null);
-    setFormData({
-      nombre: "",
-      apellido: "",
-      email: "",
-      whatsapp: "",
-      rol: "Operador",
-      activo: true,
-    });
+    setFormData({ nombre: "", apellido: "", email: "", whatsapp: "", rol: "Operador", activo: true });
     setErrors({});
     setOpenDialog(true);
   };
@@ -166,31 +152,23 @@ export default function Usuarios() {
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
-
     if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
-    if (!formData.apellido.trim())
-      newErrors.apellido = "El apellido es obligatorio";
+    if (!formData.apellido.trim()) newErrors.apellido = "El apellido es obligatorio";
     if (!formData.email.trim()) {
       newErrors.email = "El email es obligatorio";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email inválido";
     }
-    // WhatsApp es OPCIONAL para usuarios
-    if (
-      formData.whatsapp &&
-      !/^\+?\d{10,15}$/.test(formData.whatsapp.replace(/\s/g, ""))
-    ) {
+    if (formData.whatsapp && !/^\+?\d{10,15}$/.test(formData.whatsapp.replace(/\s/g, ""))) {
       newErrors.whatsapp = "Formato inválido (ej: +5493512345678)";
     }
     if (!formData.rol) newErrors.rol = "El rol es obligatorio";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async (): Promise<void> => {
     if (!validate()) return;
-
     if (editingUsuario) {
       const updated = await usuarioService.update(editingUsuario.id, {
         nombre: formData.nombre,
@@ -216,7 +194,6 @@ export default function Usuarios() {
       } as any);
       setUsuarios([...usuarios, created]);
     }
-
     setOpenDialog(false);
   };
 
@@ -234,29 +211,6 @@ export default function Usuarios() {
     setDeleteUsuario(null);
   };
 
-  function getAvatarColor(nombre: string): string {
-    const colors = [
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#8b5cf6",
-      "#ec4899",
-      "#06b6d4",
-    ];
-    const index = nombre.charCodeAt(0) % colors.length;
-    return colors[index] ?? "#999";
-  }
-
-  const getRolColor = (rol: UserRole): { bg: string; color: string } => {
-    const colors: Record<UserRole, { bg: string; color: string }> = {
-      SuperAdmin: { bg: "#dc262615", color: "#dc2626" },
-      Admin: { bg: "#ef444415", color: "#ef4444" },
-      Supervisor: { bg: "#f59e0b15", color: "#f59e0b" },
-      Operador: { bg: "#3b82f615", color: "#3b82f6" },
-    };
-    return colors[rol] || { bg: "#99999915", color: "#999" };
-  };
-
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
@@ -269,14 +223,7 @@ export default function Usuarios() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 3,
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
           <Box>
             <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
               Usuarios del Sistema
@@ -287,8 +234,7 @@ export default function Usuarios() {
             </Typography>
           </Box>
         </Box>
-
-        {/* Filtros */}
+        {/* Filters */}
         <Box
           sx={{
             display: "flex",
@@ -315,51 +261,20 @@ export default function Usuarios() {
               ),
             }}
           />
-
-          <TextField
-            select
-            size="small"
-            label="Rol"
-            value={filterRol}
-            onChange={(e) => setFilterRol(e.target.value)}
-            sx={{ minWidth: 150 }}
-          >
+          <TextField select size="small" label="Rol" value={filterRol} onChange={(e) => setFilterRol(e.target.value)} sx={{ minWidth: 150 }}>
             <MenuItem value="Todos">Todos los roles</MenuItem>
-            {roles.map((rol) => (
+            {Object.values(ROLES).map((rol) => (
               <MenuItem key={rol} value={rol}>
                 {rol}
               </MenuItem>
             ))}
           </TextField>
-
-          <Button
-            variant="outlined"
-            startIcon={<FileDownloadIcon />}
-            onClick={handleExport}
-            disabled={filteredUsuarios.length === 0}
-            sx={{
-              borderColor: "#10b981",
-              color: "#10b981",
-              fontWeight: 600,
-              "&:hover": {
-                borderColor: "#059669",
-                bgcolor: "#10b98110",
-              },
-            }}
+          <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={handleExport} disabled={filteredUsuarios.length === 0}
+            sx={{ borderColor: "#10b981", color: "#10b981", fontWeight: 600, "&:hover": { borderColor: "#059669", bgcolor: "#10b98110" } }}
           >
             Exportar
           </Button>
-
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleNew}
-            sx={{
-              bgcolor: "#1E2C56",
-              fontWeight: 600,
-              "&:hover": { bgcolor: "#16213E" },
-            }}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleNew} sx={{ bgcolor: "#1E2C56", fontWeight: 600, "&:hover": { bgcolor: "#16213E" } }}>
             Nuevo Usuario
           </Button>
         </Box>
@@ -367,289 +282,120 @@ export default function Usuarios() {
 
       {/* Grid de usuarios */}
       <Grid container spacing={3}>
-        {filteredUsuarios.map((usuario) => {
-          return (
-            /* @ts-expect-error - MUI v7 Grid type incompatibility */
-            <Grid item xs={12} sm={6} md={4} key={usuario.id}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: 2,
-                  height: "100%",
-                  transition: "all 0.3s",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transform: "translateY(-2px)",
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 2.5 }}>
-                  {/* Avatar y estado */}
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Avatar
-                      sx={{
-                        width: 56,
-                        height: 56,
-                        bgcolor: getAvatarColor(usuario.nombre),
-                        fontSize: 20,
-                        fontWeight: 700,
-                        mr: 2,
-                      }}
-                    >
-                      {getInitials(usuario.nombre, usuario.apellido || "")}
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight="700"
-                        sx={{ mb: 0.5 }}
-                      >
-                        {usuario.nombre} {usuario.apellido || ""}
-                      </Typography>
-                      <Box sx={{ display: "flex", gap: 0.5 }}>
-                        <Chip
-                          label={usuario.rol}
-                          size="small"
-                          sx={{
-                            bgcolor: getRolColor(usuario.rol).bg,
-                            color: getRolColor(usuario.rol).color,
-                            fontWeight: 600,
-                            height: 20,
-                            fontSize: 11,
-                          }}
-                        />
-                        <Chip
-                          label={usuario.activo ? "Activo" : "Inactivo"}
-                          size="small"
-                          sx={{
-                            bgcolor: usuario.activo ? "#10b98115" : "#99999915",
-                            color: usuario.activo ? "#10b981" : "#999",
-                            fontWeight: 600,
-                            height: 20,
-                            fontSize: 11,
-                          }}
-                        />
-                      </Box>
+        {filteredUsuarios.map((usuario) => (
+          <Grid item xs={12} sm={6} md={4} key={usuario.id}>
+            <Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 2, height: "100%", transition: "all 0.3s", "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.08)", transform: "translateY(-2px)" } }}>
+              <CardContent sx={{ p: 2.5 }}>
+                {/* Avatar y estado */}
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Avatar sx={{ width: 56, height: 56, bgcolor: getAvatarColor(usuario.nombre), fontSize: 20, fontWeight: 700, mr: 2 }}>
+                    {getInitials(usuario.nombre, usuario.apellido)}
+                  </Avatar>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" fontWeight="700" sx={{ mb: 0.5 }}>
+                      {usuario.nombre} {usuario.apellido || ""}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <Chip label={usuario.rol} size="small" sx={{ bgcolor: getRolColor(usuario.rol).bg, color: getRolColor(usuario.rol).color, fontWeight: 600, height: 20, fontSize: 11 }} />
+                      <Chip label={usuario.activo ? "Activo" : "Inactivo"} size="small" sx={{ bgcolor: usuario.activo ? "#10b98115" : "#99999915", color: usuario.activo ? "#10b981" : "#999", fontWeight: 600, height: 20, fontSize: 11 }} />
                     </Box>
                   </Box>
-
-                  {/* Info */}
-                  <Box sx={{ mb: 2 }}>
+                </Box>
+                {/* Info */}
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.3 }}>
+                      Email
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600" sx={{ wordBreak: "break-word" }}>
+                      {usuario.email}
+                    </Typography>
+                  </Box>
+                  {usuario.whatsapp && (
                     <Box sx={{ mb: 1.5 }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block", mb: 0.3 }}
-                      >
-                        Email
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.3 }}>
+                        WhatsApp (opcional)
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        fontWeight="600"
-                        sx={{ wordBreak: "break-word" }}
-                      >
-                        {usuario.email}
-                      </Typography>
-                    </Box>
-
-                    {usuario.whatsapp && (
-                      <Box sx={{ mb: 1.5 }}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ display: "block", mb: 0.3 }}
-                        >
-                          WhatsApp (opcional)
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <PhoneAndroidIcon sx={{ fontSize: 16, color: "#10b981" }} />
+                        <Typography variant="body2" fontWeight="600">
+                          {usuario.whatsapp}
                         </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <PhoneAndroidIcon
-                            sx={{ fontSize: 16, color: "#10b981" }}
-                          />
-                          <Typography variant="body2" fontWeight="600">
-                            {usuario.whatsapp}
-                          </Typography>
-                        </Box>
                       </Box>
-                    )}
-                  </Box>
-
+                    </Box>
+                  )}
                   {user?.rol === "SuperAdmin" && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mb: 2 }}
-                    >
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
                       Empresa: {usuario.empresaNombre || "N/A"}
                     </Typography>
                   )}
-
-                  {/* Acciones */}
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEdit(usuario)}
-                      sx={{
-                        bgcolor: "#f3f4f6",
-                        "&:hover": { bgcolor: "#e5e7eb" },
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteClick(usuario)}
-                      sx={{
-                        bgcolor: "#fee2e2",
-                        color: "#dc2626",
-                        "&:hover": { bgcolor: "#fecaca" },
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+                </Box>
+                {/* Acciones */}
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <IconButton size="small" onClick={() => handleEdit(usuario)} sx={{ bgcolor: "#e5e7eb", color: "#374151", "&:hover": { bgcolor: "#d1d5db" } }}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => handleDeleteClick(usuario)} sx={{ bgcolor: "#fee2e2", color: "#dc2626", "&:hover": { bgcolor: "#fecaca" } }}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+        {filteredUsuarios.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 8, width: "100%" }}>
+            <PersonIcon sx={{ fontSize: 64, color: "#ddd", mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">
+              No hay usuarios registrados
+            </Typography>
+          </Box>
+        )}
       </Grid>
 
-      {filteredUsuarios.length === 0 && (
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <PersonIcon sx={{ fontSize: 64, color: "#ddd", mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">
-            No hay usuarios registrados
-          </Typography>
-        </Box>
-      )}
-
       {/* Dialogs */}
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingUsuario ? "Editar Usuario" : "Nuevo Usuario"}
-        </DialogTitle>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingUsuario ? "Editar Usuario" : "Nuevo Usuario"}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Nombre"
-              value={formData.nombre}
-              onChange={(e) =>
-                setFormData({ ...formData, nombre: e.target.value })
-              }
-              error={!!errors.nombre}
-              helperText={errors.nombre}
-              required
-            />
-
-            <TextField
-              fullWidth
-              label="Apellido"
-              value={formData.apellido}
-              onChange={(e) =>
-                setFormData({ ...formData, apellido: e.target.value })
-              }
-              error={!!errors.apellido}
-              helperText={errors.apellido}
-              required
-            />
-
-            <TextField
-              fullWidth
-              type="email"
-              label="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              error={!!errors.email}
-              helperText={errors.email}
-              required
-            />
-
-            <TextField
-              fullWidth
-              label="Número WhatsApp (opcional)"
-              placeholder="+5493512345678"
-              value={formData.whatsapp}
-              onChange={(e) =>
-                setFormData({ ...formData, whatsapp: e.target.value })
-              }
-              error={!!errors.whatsapp}
-              helperText={
-                errors.whatsapp ||
-                "Formato: +54 9 351 234 5678 (opcional para usuarios web)"
-              }
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneAndroidIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <TextField
-              fullWidth
-              select
-              label="Rol"
-              value={formData.rol}
-              onChange={(e) =>
-                setFormData({ ...formData, rol: e.target.value as UserRole })
-              }
-              error={!!errors.rol}
-              helperText={errors.rol}
-              required
-            >
-              {roles.map((rol) => (
+            <TextField fullWidth label="Nombre" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} error={!!errors.nombre} helperText={errors.nombre} required />
+            <TextField fullWidth label="Apellido" value={formData.apellido} onChange={(e) => setFormData({ ...formData, apellido: e.target.value })} error={!!errors.apellido} helperText={errors.apellido} required />
+            <TextField fullWidth type="email" label="Email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} error={!!errors.email} helperText={errors.email} required />
+            <TextField fullWidth label="Número WhatsApp (opcional)" placeholder="+5493512345678" value={formData.whatsapp} onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} error={!!errors.whatsapp} helperText={errors.whatsapp || "Formato: +54 9 351 234 5678 (opcional)"} InputProps={{ startAdornment: (<InputAdornment position="start"><PhoneAndroidIcon sx={{ color: "#999" }} /></InputAdornment>) }} />
+            <TextField fullWidth select label="Rol" value={formData.rol} onChange={(e) => setFormData({ ...formData, rol: e.target.value as UserRole })} error={!!errors.rol} helperText={errors.rol} required>
+              {Object.values(ROLES).map((rol) => (
                 <MenuItem key={rol} value={rol}>
                   {rol}
                 </MenuItem>
               ))}
             </TextField>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography variant="body2">Activo</Typography>
+              <Button variant={formData.activo ? "contained" : "outlined"} onClick={() => setFormData({ ...formData, activo: !formData.activo })}>
+                {formData.activo ? "Sí" : "No"}
+              </Button>
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={handleSave}>
-            {editingUsuario ? "Guardar Cambios" : "Crear Usuario"}
-          </Button>
+          <Button variant="contained" onClick={handleSave}>{editingUsuario ? "Guardar Cambios" : "Crear Usuario"}</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-      >
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de eliminar al usuario{" "}
-            <strong>
-              {deleteUsuario?.nombre} {deleteUsuario?.apellido || ""}
-            </strong>
-            ?
+            ¿Estás seguro de eliminar al usuario <strong>{deleteUsuario?.nombre} {deleteUsuario?.apellido || ""}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>
-            Eliminar
-          </Button>
+          <Button variant="contained" color="error" onClick={handleDelete}>Eliminar</Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
 }
+

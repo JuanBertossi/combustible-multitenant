@@ -134,7 +134,7 @@ export default function Dashboard() {
   ];
 
   // Simulación de loading visual para optimización UX
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   // Puedes activar el loading con setIsLoading(true) en fetchs reales
   if (isLoading) {
@@ -436,7 +436,7 @@ export default function Dashboard() {
                     cx="50%"
                     cy="45%"
                     labelLine={false}
-                    label={(entry) => `${entry["porcentaje"]}%`}
+                    label={(entry: any) => `${entry["porcentaje"]}%`}
                     outerRadius={95}
                     innerRadius={55}
                     fill="#8884d8"

@@ -254,3 +254,4 @@ export default function UmbralesTab({ umbrales, onUpdate, onSave }: UmbralesTabP
     </>
   );
 }
+

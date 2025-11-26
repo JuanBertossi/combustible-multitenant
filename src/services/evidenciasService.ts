@@ -57,7 +57,7 @@ export const evidenciasService = {
     files: Array<{ file: File; tipo: TipoEvidencia }>
   ): Promise<EvidenciaUploadResponse[]> => {
     const uploadPromises = files.map((item) =>
-      this.upload({
+      evidenciasService.upload({
         eventoId,
         tipo: item.tipo,
         file: item.file,

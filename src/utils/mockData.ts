@@ -1,5 +1,5 @@
 // Datos hardcodeados para el MVP
-import type { Evento, CentroCosto, Surtidor, Tanque } from "../types";
+import type { Evento, CentroCosto, Surtidor } from "../types";
 export const mockUser = {
   id: 1,
   nombre: "Juan",
@@ -16,9 +16,9 @@ export const mockSurtidores: Surtidor[] = [
     codigo: "SUR-001",
     nombre: "Surtidor Principal",
     ubicacion: "Estación Central",
-    tipoCombustible: "Diésel",
+    tipoCombustible: "Diesel",
     empresaId: 1,
-    empresa: "AgroTransporte SA",
+    tanqueId: 1,
     activo: true,
   },
   {
@@ -26,9 +26,9 @@ export const mockSurtidores: Surtidor[] = [
     codigo: "SUR-002",
     nombre: "Surtidor Campo Norte",
     ubicacion: "Lote 45",
-    tipoCombustible: "Diésel",
+    tipoCombustible: "Diesel",
     empresaId: 1,
-    empresa: "AgroTransporte SA",
+    tanqueId: 1,
     activo: true,
   },
   {
@@ -38,7 +38,7 @@ export const mockSurtidores: Surtidor[] = [
     ubicacion: "Planta Industrial",
     tipoCombustible: "Nafta",
     empresaId: 2,
-    empresa: "Transportes del Sur",
+    tanqueId: 2,
     activo: false,
   },
 ];

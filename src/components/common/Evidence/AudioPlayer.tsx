@@ -267,3 +267,4 @@ export default function AudioPlayer({ audio, onDownload }: AudioPlayerProps) {
     </Card>
   );
 }
+

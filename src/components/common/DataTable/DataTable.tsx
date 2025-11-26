@@ -148,3 +148,4 @@ export default function DataTable<T extends { id: number | string }>({
     </TableContainer>
   );
 }
+

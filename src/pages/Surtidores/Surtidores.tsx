@@ -319,7 +319,7 @@ export default function Surtidores() {
       <Grid container spacing={3}>
         {filteredSurtidores.map((surtidor) => (
           /* @ts-expect-error - MUI v7 Grid type incompatibility */
-          <Grid item xs={12} sm={6} md={4} lg={3} key={surtidor.id}>
+          <Grid xs={12} sm={6} md={4} lg={3} key={surtidor.id}>
             <Card
               elevation={0}
               sx={{
@@ -565,3 +565,4 @@ export default function Surtidores() {
     </Box>
   );
 }
+

@@ -34,7 +34,7 @@ import {
   validarEventoConPoliticas,
   ValidationResult,
 } from "../../utils/validacionPoliticas";
-import type { TipoEvidencia, Evidencia } from "../../types/reports";
+import type { Evidencia } from "../../types/reports";
 import type { Evento } from "../../types";
 
 interface CargarEventoFormProps {
@@ -266,14 +266,14 @@ export default function CargarEventoForm({
     onClose();
   };
 
-  const handleUploadFotos = async (files: File[], tipo: TipoEvidencia) => {
+  const handleUploadFotos = async (files: File[]) => {
     setFormData({
       ...formData,
       evidenciasFotos: [...formData.evidenciasFotos, ...files],
     });
   };
 
-  const handleUploadAudio = async (files: File[], tipo: TipoEvidencia) => {
+  const handleUploadAudio = async (files: File[]) => {
     setFormData({
       ...formData,
       evidenciaAudio: files[0],
@@ -354,7 +354,7 @@ export default function CargarEventoForm({
             <Grid container spacing={3}>
               {/* Vehículo */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Autocomplete
                   options={mockVehiculos}
                   getOptionLabel={(option) =>
@@ -383,7 +383,7 @@ export default function CargarEventoForm({
 
               {/* Chofer */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Autocomplete
                   options={mockChoferes}
                   getOptionLabel={(option) => `${option.nombre} ${option.apellido}`}
@@ -408,7 +408,7 @@ export default function CargarEventoForm({
 
               {/* Surtidor */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Autocomplete
                   options={mockSurtidores}
                   getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
@@ -435,7 +435,7 @@ export default function CargarEventoForm({
 
               {/* Fecha y Hora */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <TextField
                   fullWidth
                   type="datetime-local"
@@ -477,7 +477,7 @@ export default function CargarEventoForm({
             <Grid container spacing={3}>
               {/* Litros */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <TextField
                   fullWidth
                   type="number"
@@ -496,7 +496,7 @@ export default function CargarEventoForm({
 
               {/* Odómetro */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   type="number"
@@ -515,7 +515,7 @@ export default function CargarEventoForm({
 
               {/* Horómetro */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   type="number"
@@ -534,7 +534,7 @@ export default function CargarEventoForm({
 
               {/* Ubicación GPS */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Card elevation={0} sx={{ bgcolor: "#f8f9fa", border: "1px solid #e0e0e0" }}>
                   <CardContent>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -556,7 +556,7 @@ export default function CargarEventoForm({
 
               {/* Observaciones */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <TextField
                   fullWidth
                   multiline
@@ -584,7 +584,7 @@ export default function CargarEventoForm({
             <Grid container spacing={3}>
               {/* Fotos */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
                   📷 Fotos de Evidencia
                 </Typography>
@@ -600,7 +600,7 @@ export default function CargarEventoForm({
 
               {/* Audio */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
                   🎤 Nota de Voz (Opcional)
                 </Typography>
@@ -642,7 +642,7 @@ export default function CargarEventoForm({
             <Grid container spacing={2}>
               {/* Info básica */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Card elevation={0} sx={{ bgcolor: "#f8f9fa" }}>
                   <CardContent>
                     <Typography variant="caption" color="text.secondary">
@@ -657,7 +657,7 @@ export default function CargarEventoForm({
               </Grid>
 
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <Card elevation={0} sx={{ bgcolor: "#f8f9fa" }}>
                   <CardContent>
                     <Typography variant="caption" color="text.secondary">
@@ -671,7 +671,7 @@ export default function CargarEventoForm({
               </Grid>
 
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <Card elevation={0} sx={{ bgcolor: "#f8f9fa" }}>
                   <CardContent>
                     <Typography variant="caption" color="text.secondary">
@@ -685,13 +685,13 @@ export default function CargarEventoForm({
               </Grid>
 
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Divider />
               </Grid>
 
               {/* Mediciones */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12} sm={4}>
+              <Grid xs={12} sm={4}>
                 <Card elevation={0} sx={{ bgcolor: "#1E2C5608" }}>
                   <CardContent>
                     <Typography variant="caption" color="text.secondary">
@@ -706,7 +706,7 @@ export default function CargarEventoForm({
 
               {formData.odometro && (
                 /* @ts-expect-error - MUI v7 Grid type incompatibility */
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Card elevation={0} sx={{ bgcolor: "#f8f9fa" }}>
                     <CardContent>
                       <Typography variant="caption" color="text.secondary">
@@ -722,7 +722,7 @@ export default function CargarEventoForm({
 
               {formData.horometro && (
                 /* @ts-expect-error - MUI v7 Grid type incompatibility */
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Card elevation={0} sx={{ bgcolor: "#f8f9fa" }}>
                     <CardContent>
                       <Typography variant="caption" color="text.secondary">
@@ -738,7 +738,7 @@ export default function CargarEventoForm({
 
               {/* Evidencias */}
               {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Card elevation={0} sx={{ bgcolor: "#3b82f608", border: "1px solid #3b82f630" }}>
                   <CardContent>
                     <Typography variant="caption" fontWeight={600} color="#3b82f6">
@@ -794,3 +794,4 @@ export default function CargarEventoForm({
     </Dialog>
   );
 }
+

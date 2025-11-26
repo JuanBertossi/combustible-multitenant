@@ -7,7 +7,7 @@ import Header from "./Header";
 
 export default function DashboardLayout() {
   // Estado de ejemplo para mostrar la barra de progreso
-  const [progressVisible, setProgressVisible] = useState(false);
+  const [progressVisible] = useState(false); // setProgressVisible removed to avoid warning
 
   // Puedes disparar setProgressVisible(true) en operaciones largas (fetch, export, etc.)
   return (
@@ -65,3 +65,4 @@ export default function DashboardLayout() {
     </Box>
   );
 }
+

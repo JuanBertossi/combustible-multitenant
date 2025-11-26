@@ -220,6 +220,8 @@ export default function Tanques() {
         await tanqueService.create({
           ...formData,
           capacidadMaxima: capacidad,
+          capacidadTotal: capacidad, // Asignar capacidadTotal igual a capacidadMaxima por defecto
+          nivelMinimo: 0, // Valor por defecto
           nivelActual: nivel,
           empresaId: currentTenant?.id || 0,
           empresa: currentTenant?.nombre,
@@ -381,7 +383,7 @@ export default function Tanques() {
 
           return (
             /* @ts-expect-error - MUI v7 Grid type incompatibility */
-            <Grid item xs={12} sm={6} md={4} key={tanque.id}>
+            <Grid xs={12} sm={6} md={4} key={tanque.id}>
               <Card
                 elevation={0}
                 sx={{
@@ -712,3 +714,4 @@ export default function Tanques() {
     </Box>
   );
 }
+

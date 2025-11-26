@@ -11,16 +11,12 @@ import {
   MenuItem,
   Typography,
   InputAdornment,
-  LinearProgress,
-  Alert,
 } from "@mui/material";
 import VirtualizedTable, {
   DataTableColumn,
 } from "../../components/common/DataTable/VirtualizedTable";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import * as XLSX from "xlsx";
 import { useAuth } from "../../hooks/useAuth";
@@ -52,13 +48,12 @@ export default function Eventos() {
   const { user } = useAuth();
   const { currentTenant } = useTenant();
   const [eventos, setEventos] = useState<EventoExtended[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true); // Removed unused loading
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(
-    null
-  );
+  const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(null);
   const [deleteEvento, setDeleteEvento] = useState<EventoExtended | null>(null);
+
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [formData, setFormData] = useState<EventoFormData>({
     vehiculoId: "",
@@ -74,14 +69,14 @@ export default function Eventos() {
     ubicacion: "",
     activo: true,
   });
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors] = useState<FormErrors>({});
 
   // Load data on mount
   useEffect(() => {
     const fetchData = async () => {
       const data = await eventoService.getAll();
       setEventos(data);
-      setLoading(false);
+
     };
     fetchData();
   }, []);
