@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { TenantContext } from "./tenant-context";
 import type { TenantConfig } from "./types";
 
-
 export function useTenantContext(): TenantConfig {
   const context = useContext(TenantContext);
   if (!context) {
