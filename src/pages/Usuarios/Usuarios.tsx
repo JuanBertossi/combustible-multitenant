@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTenantContext } from "../../components/providers/tenants/use-tenant";
 import {
   Box,
   Button,
@@ -77,9 +78,9 @@ const getRolColor = (rol: UserRole): { bg: string; color: string } => {
   return colors[rol] || { bg: "#99999915", color: "#999" };
 };
 
-export default function Usuarios() {
   const { user } = useAuth();
   const { currentTenant } = useTenant();
+  const tenant = useTenantContext();
 
   const [usuarios, setUsuarios] = useState<UsuarioExtended[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -259,8 +260,8 @@ export default function Usuarios() {
           }}
         >
           <Box>
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
-              Usuarios del Sistema
+            <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }} color={tenant?.theme || "#1E2C56"}>
+              Usuarios del Sistema {tenant?.name ? `- ${tenant.name}` : ""}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Gestión de accesos al frontoffice web • {filteredUsuarios.length}{" "}
@@ -329,9 +330,9 @@ export default function Usuarios() {
             startIcon={<AddIcon />}
             onClick={handleNew}
             sx={{
-              bgcolor: "#1E2C56",
+              bgcolor: tenant?.theme || "#1E2C56",
               fontWeight: 600,
-              "&:hover": { bgcolor: "#16213E" },
+              "&:hover": { bgcolor: tenant?.theme || "#16213E" },
             }}
           >
             Nuevo Usuario

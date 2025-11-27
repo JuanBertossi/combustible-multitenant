@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTenantContext } from "../../components/providers/tenants/use-tenant";
 import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
@@ -91,18 +92,20 @@ const consumoPorTipo: ConsumoPorTipoData[] = [
 
 const COLORS = ["#1E2C56", "#4A90E2", "#10b981", "#f59e0b"];
 
-export default function Dashboard() {
   const [periodo, setPeriodo] = useState<PeriodoType>("mes");
+  const tenant = useTenantContext();
 
+  // Aplica el color del tema del tenant a los KPIs
+  const themeColor = tenant?.theme || "#1E2C56";
   const kpis: KPIData[] = [
     {
-      label: "Consumo Total",
+      label: `Consumo Total (${tenant?.name})`,
       value: "32,450 L",
       change: "+12%",
       trend: "up",
       icon: <LocalGasStationIcon sx={{ fontSize: 28 }} />,
-      color: "#1E2C56",
-      bgColor: "#1E2C5615",
+      color: themeColor,
+      bgColor: themeColor + "15",
     },
     {
       label: "Costo Total",
@@ -148,7 +151,7 @@ export default function Dashboard() {
 
   return (
     <Box>
-      {/* Header */}
+      {/* Header con nombre del tenant */}
       <Box sx={{ mb: 5 }}>
         <Box
           sx={{
@@ -158,6 +161,9 @@ export default function Dashboard() {
             mb: 2,
           }}
         >
+          <Typography variant="h5" fontWeight={700} color={themeColor} sx={{ mb: 2 }}>
+            {tenant?.name ? `Panel de ${tenant.name}` : "Panel General"}
+          </Typography>
           <FormControl
             size="small"
             sx={{

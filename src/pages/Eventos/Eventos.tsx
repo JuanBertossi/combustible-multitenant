@@ -1,5 +1,4 @@
-// Eventos page migrated to Service Layer
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -14,20 +13,33 @@ import {
 } from "@mui/material";
 import VirtualizedTable, {
   DataTableColumn,
-} from "../../common/DataTable/VirtualizedTable";
+} from "../../components/common/DataTable/VirtualizedTable";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import SearchIcon from "@mui/icons-material/Search";
 import * as XLSX from "xlsx";
-import { useAuth } from "../../../hooks/useAuth";
-import { useTenant } from "../../../hooks/useTenant";
-import { eventoService } from "../../../services/EventoService";
-import type { EventoExtended, FormErrors } from "../../../types";
+import { useAuth } from "../../hooks/useAuth";
+import { useTenant } from "../../hooks/useTenant";
 import {
   mockVehiculos,
   mockChoferes,
   mockSurtidores,
-} from "../../../utils/mockData";
+} from "../../utils/mockData";
+
+interface EventoExtended {
+  id: number;
+  vehiculoPatente: string;
+  choferNombre: string;
+  surtidorNombre: string;
+  litros: number;
+  precio: number;
+  total: number;
+  estado: "Pendiente" | "Validado" | "Rechazado";
+  observaciones: string;
+  ubicacion: string;
+  empresaId: number;
+  empresaNombre?: string;
+}
 
 interface EventoFormData {
   vehiculoId: number | "";
@@ -39,61 +51,83 @@ interface EventoFormData {
   fecha: string;
   estado: "Pendiente" | "Validado" | "Rechazado";
   observaciones: string;
-  evidencias?: File[];
-  ubicacion?: string;
+  ubicacion: string;
+  evidencias: File[];
   activo: boolean;
 }
 
-export default function Eventos() {
+const defaultFormData: EventoFormData = {
+  vehiculoId: "",
+  choferId: "",
+  surtidorId: "",
+  litros: "",
+  precio: "",
+  total: "",
+  fecha: "",
+  estado: "Pendiente",
+  observaciones: "",
+  ubicacion: "",
+  evidencias: [],
+  activo: true,
+};
+
+const Eventos: React.FC = () => {
   const { user } = useAuth();
   const { currentTenant } = useTenant();
+
+  // Simulación de eventos
   const [eventos, setEventos] = useState<EventoExtended[]>([]);
-  // const [loading, setLoading] = useState<boolean>(true); // Removed unused loading
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
   const [editingEvento, setEditingEvento] = useState<EventoExtended | null>(
     null
   );
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteEvento, setDeleteEvento] = useState<EventoExtended | null>(null);
+  const [formData, setFormData] = useState<EventoFormData>(defaultFormData);
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [formData, setFormData] = useState<EventoFormData>({
-    vehiculoId: "",
-    choferId: "",
-    surtidorId: "",
-    litros: "",
-    precio: "",
-    total: "",
-    fecha: "",
-    estado: "Pendiente",
-    observaciones: "",
-    evidencias: [],
-    ubicacion: "",
-    activo: true,
-  });
-  const [errors] = useState<FormErrors>({});
-
-  // Load data on mount
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await eventoService.getAll();
-      setEventos(data);
-    };
-    fetchData();
+    // Simulación de fetch
+    setEventos([
+      {
+        id: 1,
+        vehiculoPatente: "ABC123",
+        choferNombre: "Juan Pérez",
+        surtidorNombre: "Surtidor 1",
+        litros: 50,
+        precio: 100,
+        total: 5000,
+        estado: "Validado",
+        observaciones: "Sin observaciones",
+        ubicacion: "Depósito Central",
+        empresaId: 1,
+        empresaNombre: "Empresa A",
+      },
+      {
+        id: 2,
+        vehiculoPatente: "XYZ789",
+        choferNombre: "Ana Gómez",
+        surtidorNombre: "Surtidor 2",
+        litros: 30,
+        precio: 120,
+        total: 3600,
+        estado: "Pendiente",
+        observaciones: "Revisar ticket",
+        ubicacion: "Sucursal Norte",
+        empresaId: 2,
+        empresaNombre: "Empresa B",
+      },
+    ]);
   }, []);
 
-  // Filter by tenant
+  // Filtrar por empresa y búsqueda
   const eventosPorEmpresa = eventos.filter(
     (e) => e.empresaId === currentTenant?.id
   );
-
-  // Limpieza de variables y props inexistentes en filtro
   const filteredEventos = eventosPorEmpresa.filter((e) => {
-    const vehiculoPatente = e.vehiculoPatente
-      ? e.vehiculoPatente.toLowerCase()
-      : "";
-    const choferNombre = e.choferNombre ? e.choferNombre.toLowerCase() : "";
-    const observaciones = e.observaciones ? e.observaciones.toLowerCase() : "";
+    const vehiculoPatente = e.vehiculoPatente?.toLowerCase() || "";
+    const choferNombre = e.choferNombre?.toLowerCase() || "";
+    const observaciones = e.observaciones?.toLowerCase() || "";
     const term = searchTerm.toLowerCase();
     return (
       vehiculoPatente.includes(term) ||
@@ -102,7 +136,6 @@ export default function Eventos() {
     );
   });
 
-  // Columnas para la tabla virtualizada
   const columns: DataTableColumn<EventoExtended>[] = [
     { field: "vehiculoPatente", headerName: "Vehículo" },
     { field: "choferNombre", headerName: "Chofer" },
@@ -137,31 +170,23 @@ export default function Eventos() {
     setEditingEvento(null);
     setOpenDialog(true);
   };
-
   const handleEdit = (evento: EventoExtended) => {
     setEditingEvento(evento);
     setOpenDialog(true);
   };
-
   const handleDeleteClick = (evento: EventoExtended) => {
     setDeleteEvento(evento);
     setOpenDeleteDialog(true);
   };
-
   const handleSave = () => {
-    // Simulate save logic
     setOpenDialog(false);
     setEditingEvento(null);
   };
-
   const handleDelete = () => {
-    // Simulate delete logic
     setOpenDeleteDialog(false);
     setDeleteEvento(null);
   };
-
   const handleExport = (): void => {
-    // Create worksheet from filteredEventos
     const ws = XLSX.utils.json_to_sheet(filteredEventos);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Eventos");
@@ -172,28 +197,35 @@ export default function Eventos() {
   };
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 3,
-          }}
-        >
-          <Box>
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
-              Eventos
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Gestión de eventos • {filteredEventos.length}{" "}
-              {filteredEventos.length === 1 ? "evento" : "eventos"}
-            </Typography>
-          </Box>
+    <Box sx={{ p: 3 }}>
+      {/* Header y filtros */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Typography variant="h5" sx={{ flexGrow: 1 }}>
+            Gestión de eventos
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleNew}
+          >
+            Nuevo Evento
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            onClick={handleExport}
+            disabled={filteredEventos.length === 0}
+            sx={{
+              borderColor: "#10b981",
+              color: "#10b981",
+              fontWeight: 600,
+              "&:hover": { borderColor: "#059669", bgcolor: "#10b98110" },
+            }}
+          >
+            Exportar Excel
+          </Button>
         </Box>
-        {/* Filters */}
         <Box
           sx={{
             display: "flex",
@@ -220,32 +252,10 @@ export default function Eventos() {
               ),
             }}
           />
-          <Button
-            variant="outlined"
-            startIcon={<FileDownloadIcon />}
-            onClick={handleExport}
-            disabled={filteredEventos.length === 0}
-            sx={{
-              borderColor: "#10b981",
-              color: "#10b981",
-              fontWeight: 600,
-              "&:hover": { borderColor: "#059669", bgcolor: "#10b98110" },
-            }}
-          >
-            Exportar
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleNew}
-            sx={{
-              bgcolor: "#1E2C56",
-              fontWeight: 600,
-              "&:hover": { bgcolor: "#16213E" },
-            }}
-          >
-            Nuevo Evento
-          </Button>
+          <Typography variant="body2" color="text.secondary">
+            {filteredEventos.length}{" "}
+            {filteredEventos.length === 1 ? "evento" : "eventos"}
+          </Typography>
         </Box>
       </Box>
 
@@ -277,8 +287,6 @@ export default function Eventos() {
               onChange={(e) =>
                 setFormData({ ...formData, vehiculoId: Number(e.target.value) })
               }
-              error={!!errors.vehiculoId}
-              helperText={errors.vehiculoId}
               required
               fullWidth
             >
@@ -296,8 +304,6 @@ export default function Eventos() {
               onChange={(e) =>
                 setFormData({ ...formData, choferId: Number(e.target.value) })
               }
-              error={!!errors.choferId}
-              helperText={errors.choferId}
               required
               fullWidth
             >
@@ -315,8 +321,6 @@ export default function Eventos() {
               onChange={(e) =>
                 setFormData({ ...formData, surtidorId: Number(e.target.value) })
               }
-              error={!!errors.surtidorId}
-              helperText={errors.surtidorId}
               required
               fullWidth
             >
@@ -334,8 +338,6 @@ export default function Eventos() {
               onChange={(e) =>
                 setFormData({ ...formData, litros: Number(e.target.value) })
               }
-              error={!!errors.litros}
-              helperText={errors.litros}
               required
               fullWidth
             />
@@ -364,8 +366,6 @@ export default function Eventos() {
               onChange={(e) =>
                 setFormData({ ...formData, fecha: e.target.value })
               }
-              error={!!errors.fecha}
-              helperText={errors.fecha}
               required
               InputLabelProps={{ shrink: true }}
               fullWidth
@@ -448,7 +448,7 @@ export default function Eventos() {
       >
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
-          ¿Estás seguro de eliminar el evento {deleteEvento?.vehiculo}?
+          ¿Estás seguro de eliminar el evento {deleteEvento?.vehiculoPatente}?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
@@ -459,4 +459,6 @@ export default function Eventos() {
       </Dialog>
     </Box>
   );
-}
+};
+
+export default Eventos;

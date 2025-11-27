@@ -1,21 +1,31 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { GoogleMapsPlugin } from '../vite-plugin-google-maps-main/dist/index';
+import { GoogleMapsPlugin } from "../vite-plugin-google-maps-main/dist/index";
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), GoogleMapsPlugin({
-      apiKey: 'AIzaSyCaEs0feZBkg6knGzrXrVTThUKWcCZhdSc',
-      libraries: ['places', 'marker'],
+  plugins: [
+    react({
+      babel: {
+        plugins: [["babel-plugin-react-compiler"]],
+      },
+    }),
+    tailwindcss(),
+    GoogleMapsPlugin({
+      apiKey: "AIzaSyCaEs0feZBkg6knGzrXrVTThUKWcCZhdSc",
+      libraries: ["places", "marker"],
       debug: true, // Enable dev tools
       mapDefaults: {
-        gestureHandling: 'greedy',
-        defaultCenter: { lat: 40.7128, lng: -74.0060 },
+        gestureHandling: "greedy",
+        defaultCenter: { lat: 40.7128, lng: -74.006 },
         defaultZoom: 12,
         fullscreenControl: true,
         disableDefaultUI: false,
-      }
-    }),],
+      },
+    }),
+  ],
   build: {
     rollupOptions: {
       output: {
@@ -30,5 +40,13 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 600,
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  server: {
+    port: 5177,
   },
 });

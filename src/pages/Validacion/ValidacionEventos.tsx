@@ -1,21 +1,20 @@
-import { useState, useMemo } from "react";
-import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
-import {
-  Box,
-  Typography,
-  Alert,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-  Chip,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tooltip,
-} from "@mui/material";
+type EstadoEvento = "Pendiente" | "Validado" | "Rechazado";
+import React, { useState, useMemo } from "react";
+import { useTenantContext } from "../../components/providers/tenants/use-tenant";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Tooltip from "@mui/material/Tooltip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -23,59 +22,66 @@ import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
 import EventoDetalle from "../../eventos/EventoDetalle";
-import { mockEventos } from "../../../utils/mockData";
-import { getEvidenciasByEvento } from "../../../utils/mockEvidencias";
-import { useAuth } from "../../../hooks/useAuth";
+import { mockEventos } from "../../utils/mockData";
+import { getEvidenciasByEvento } from "../../utils/mockEvidencias";
+import { useAuth } from "../../hooks/useAuth";
 import { format } from "date-fns";
-
-import { ESTADOS_EVENTO } from "../../../utils/constants";
-import type { Evento } from "../../../types";
+import { ESTADOS_EVENTO } from "../../utils/constants";
 import {
   validarEventoConPoliticas,
   getResumenValidacion,
   ValidationResult,
-} from "../../../utils/validacionPoliticas";
-import { mockPolitica, mockUmbrales } from "../../../utils/mockPoliticas";
+} from "../../utils/validacionPoliticas";
+import { mockPolitica, mockUmbrales } from "../../utils/mockPoliticas";
 
-interface EventoExtended extends Evento {
+type EventoExtended = {
+  id: number;
+  estado: string;
+  empresaId?: number;
+  vehiculoId?: number;
   vehiculo?: string;
   chofer?: string;
+  choferId?: number;
+  fecha?: string;
+  total?: number;
   costo?: number;
-  kmInicial?: number;
-  kmFinal?: number;
-  ruta?: string;
-  lote?: string;
-  labor?: string;
+  vehiculoPatente?: string;
+  choferNombre?: string;
+  empresaNombre?: string;
   motivoRechazo?: string;
-}
+  litros?: number;
+};
 
-export default function ValidacionEventos() {
+const ValidacionEventos: React.FC = () => {
+  const tenant = useTenantContext();
   const { user } = useAuth();
   const [loading] = useState<boolean>(false); // Simulación de loading visual
-  if (loading) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <SkeletonLoading height={48} count={1} />
-        <SkeletonLoading height={120} count={4} />
-      </Box>
-    );
-  }
   const [eventos, setEventos] = useState<EventoExtended[]>(
     mockEventos as EventoExtended[]
-  );
-  const [selectedEvento, setSelectedEvento] = useState<EventoExtended | null>(
-    null
   );
   const [openDetalleDialog, setOpenDetalleDialog] = useState<boolean>(false);
   const [openRejectDialog, setOpenRejectDialog] = useState<boolean>(false);
   const [motivo, setMotivo] = useState<string>("");
+  const [selectedEvento, setSelectedEvento] = useState<EventoExtended | null>(
+    null
+  );
 
-  const eventosPendientes = eventos.filter((e) => {
-    const isPendiente = e.estado === ESTADOS_EVENTO.PENDIENTE;
-    const isEmpresa =
-      user?.rol === "SuperAdmin" || e.empresaId === user?.empresaId;
-    return isPendiente && isEmpresa;
-  });
+  const eventosPendientes = eventos
+    .map((e) => ({
+      ...e,
+      estado: e.estado as unknown as EstadoEvento,
+      empresaId: e.empresaId ?? 0,
+      fecha: e.fecha ?? "",
+      vehiculoId: e.vehiculoId ?? 0,
+      choferId: e.choferId ?? 0,
+      litros: e.litros ?? 0,
+    }))
+    .filter((e) => {
+      const isPendiente = e.estado === ESTADOS_EVENTO.PENDIENTE;
+      const isEmpresa =
+        user?.rol === "SuperAdmin" || e.empresaId === user?.empresaId;
+      return isPendiente && isEmpresa;
+    });
 
   // Memoize validation results to avoid recalculating on every render
   const validationResults = useMemo(() => {
@@ -85,9 +91,9 @@ export default function ValidacionEventos() {
       // En un caso real, buscaríamos la política de la empresa del evento
       // y el umbral del vehículo específico
       const umbral = mockUmbrales.find(
-        (u) => u.vehiculoId === evento.vehiculoId
+        (u: { vehiculoId: number }) =>
+          u.vehiculoId === (evento.vehiculoId ?? null)
       );
-
       const result = validarEventoConPoliticas(
         evento,
         evidencias,
@@ -99,6 +105,15 @@ export default function ValidacionEventos() {
     return results;
   }, [eventosPendientes]);
 
+  if (loading) {
+    return (
+      <Box sx={{ p: 4 }}>
+        {/* <SkeletonLoading height={48} count={1} /> */}
+        {/* <SkeletonLoading height={120} count={4} /> */}
+      </Box>
+    );
+  }
+
   const handleViewDetalle = (evento: EventoExtended): void => {
     setSelectedEvento(evento);
     setOpenDetalleDialog(true);
@@ -108,8 +123,8 @@ export default function ValidacionEventos() {
     setEventos(
       eventos.map((e) =>
         e.id === evento.id
-          ? ({ ...e, estado: ESTADOS_EVENTO.VALIDADO } as EventoExtended)
-          : e
+          ? { ...e, estado: ESTADOS_EVENTO.VALIDADO as string }
+          : { ...e, estado: e.estado as string }
       )
     );
     setOpenDetalleDialog(false);
@@ -128,12 +143,12 @@ export default function ValidacionEventos() {
     setEventos(
       eventos.map((e) =>
         e.id === selectedEvento.id
-          ? ({
+          ? {
               ...e,
-              estado: ESTADOS_EVENTO.RECHAZADO,
+              estado: ESTADOS_EVENTO.RECHAZADO as string,
               motivoRechazo: motivo,
-            } as EventoExtended)
-          : e
+            }
+          : { ...e, estado: e.estado as string }
       )
     );
     setOpenRejectDialog(false);
@@ -158,8 +173,13 @@ export default function ValidacionEventos() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Validación de Eventos
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          gutterBottom
+          color={tenant?.theme || "#1E2C56"}
+        >
+          Validación de Eventos {tenant?.name ? `- ${tenant.name}` : ""}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Revisa evidencias y valida los eventos de combustible pendientes
@@ -217,8 +237,8 @@ export default function ValidacionEventos() {
             : false;
 
           return (
-            /* @ts-expect-error - MUI v7 Grid type incompatibility */
-            <Grid xs={12} md={6} lg={4} key={evento.id}>
+            // @ts-expect-error - MUI v7 Grid type incompatibility
+            <Grid item xs={12} md={6} lg={4} key={evento.id}>
               <Card
                 elevation={0}
                 sx={{
@@ -335,7 +355,12 @@ export default function ValidacionEventos() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       <strong>Fecha:</strong>{" "}
-                      {format(new Date(evento.fecha), "dd/MM/yyyy HH:mm")}
+                      {evento.fecha
+                        ? format(
+                            new Date(evento.fecha as string),
+                            "dd/MM/yyyy HH:mm"
+                          )
+                        : "-"}
                     </Typography>
                   </Box>
 
@@ -350,8 +375,8 @@ export default function ValidacionEventos() {
                     }}
                   >
                     <Grid container spacing={2}>
-                      {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                      <Grid xs={6}>
+                      {/** @ts-expect-error - MUI v7 Grid type incompatibility */}
+                      <Grid item xs={6}>
                         <Typography variant="caption" color="text.secondary">
                           Litros
                         </Typography>
@@ -360,11 +385,11 @@ export default function ValidacionEventos() {
                           fontWeight={700}
                           color="#1E2C56"
                         >
-                          {evento.litros} L
+                          {evento.litros ?? 0} L
                         </Typography>
                       </Grid>
-                      {/* @ts-expect-error - MUI v7 Grid type incompatibility */}
-                      <Grid xs={6}>
+                      {/** @ts-expect-error - MUI v7 Grid type incompatibility */}
+                      <Grid item xs={6}>
                         <Typography variant="caption" color="text.secondary">
                           Costo
                         </Typography>
@@ -456,7 +481,7 @@ export default function ValidacionEventos() {
           open={openDetalleDialog}
           onClose={() => setOpenDetalleDialog(false)}
           evento={selectedEvento}
-          evidencias={getEvidenciasByEvento(selectedEvento.id)}
+          evidencias={getEvidenciasByEvento(selectedEvento?.id ?? 0)}
           onValidate={handleValidate}
           onReject={handleRejectClick}
         />
@@ -545,4 +570,6 @@ export default function ValidacionEventos() {
       </Dialog>
     </Box>
   );
-}
+};
+
+export default ValidacionEventos;

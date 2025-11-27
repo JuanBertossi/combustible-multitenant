@@ -23,8 +23,8 @@ const getThemeConfig = async ({
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        name: tenant,
-        theme: getTenantTheme(tenant),
+        name: tenant || "default",
+        theme: getTenantTheme(tenant || "default"),
       });
     }, 5000);
   });
@@ -72,5 +72,5 @@ function getTenantTheme(tenant: string): string {
     clientec: "red",
     default: "",
   };
-  return themes[tenant] || themes.default;
+  return themes[tenant || "default"] ?? themes.default ?? "#1E2C56";
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTenantContext } from "../../components/providers/tenants/use-tenant";
 import SkeletonLoading from "../../common/SkeletonLoading/SkeletonLoading";
 import {
   Box,
@@ -27,10 +28,10 @@ interface EmpresaFormData {
   activo: boolean;
 }
 
-export default function Empresas() {
   const [empresas, setEmpresas] = useState<Empresa[]>(
     mockEmpresas as Empresa[]
   );
+  const tenant = useTenantContext();
   const [loading] = useState<boolean>(false); // Simulación de loading
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
@@ -156,8 +157,8 @@ export default function Empresas() {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Empresas
+        <Typography variant="h4" fontWeight="bold" gutterBottom color={tenant?.theme || "#1a1a2e"}>
+          Empresas {tenant?.name ? `- ${tenant.name}` : ""}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Gestión de empresas clientes (Multi-tenant)
@@ -185,9 +186,9 @@ export default function Empresas() {
           startIcon={<AddIcon />}
           onClick={handleNew}
           sx={{
-            bgcolor: "#1a1a2e",
+            bgcolor: tenant?.theme || "#1a1a2e",
             fontWeight: "bold",
-            "&:hover": { bgcolor: "#252540" },
+            "&:hover": { bgcolor: tenant?.theme || "#252540" },
           }}
         >
           Nueva Empresa
